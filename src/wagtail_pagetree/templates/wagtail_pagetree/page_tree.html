@@ -1,0 +1,26 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load i18n static %}
+
+{% block titletag %}{% trans "Page Tree" %}{% endblock %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'wagtail_pagetree/css/styles.css' %}">
+{% endblock %}
+
+{% block main_content %}
+  <div id="pagetree-root"
+       data-locale="{{ request.GET.locale|default:'' }}"
+       data-tree-url="{% url 'pagetree:api-tree' %}"
+       data-children-url-template="{% url 'pagetree:api-children' page_id=0 %}"
+       data-bulk-url="{% url 'pagetree:api-bulk' %}"
+       data-move-url="{% url 'pagetree:api-move' %}">
+    <noscript>{% trans "JavaScript is required to use the Page Tree." %}</noscript>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script src="{% url 'pagetree:jsi18n' %}"></script>
+  <script src="{% static 'wagtail_pagetree/js/bundle.js' %}" defer></script>
+{% endblock %}

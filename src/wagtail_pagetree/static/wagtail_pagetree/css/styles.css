@@ -1,0 +1,892 @@
+/* wagtail-pagetree
+ * Hand-written BEM. Wagtail admin custom properties (--w-color-*) provide
+ * the baseline so we follow theme switches automatically. Falls back to
+ * sensible literals if a property isn't set.
+ */
+
+.pagetree {
+  --pt-row-height: 32px;
+  --pt-indent: 20px;
+  --pt-dot-size: 14px;
+  --pt-locale-col: 40px;
+  --pt-menu-col: 60px;
+  --pt-row-hover-bg: rgba(0, 0, 0, 0.04);
+  --pt-text: var(--w-color-text-label, #4c4c4c);
+  --pt-text-strong: var(--w-color-text-context, #2e2e2e);
+  font-family: var(--w-font-sans, "Open Sans", system-ui, sans-serif);
+  color: var(--pt-text);
+}
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+
+.pt-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--w-color-surface-menus, #f6f6f7);
+  border-radius: 4px;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.pt-toolbar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.pt-toolbar__field--grow {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pt-toolbar__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.pt-toolbar__label--sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High-specificity selectors below: Wagtail's core.css sets
+ * `input[type=search] { box-sizing: initial; padding: .375rem 1.25rem }`
+ * with attribute-selector specificity (0,0,1,1) which beats a single
+ * class. Prefixing with `.pagetree` brings us to (0,0,2,0). */
+
+.pagetree .pt-toolbar__select,
+.pagetree .pt-toolbar__input {
+  padding: 6px 12px;
+  border: 1px solid var(--w-color-border-field-default, #c4c4c4);
+  border-radius: 3px;
+  background: var(--w-color-surface-field, #fff);
+  font: inherit;
+  color: inherit;
+  box-sizing: border-box;
+  min-height: 0;
+  font-size: 0.9rem;
+}
+
+.pagetree .pt-toolbar__input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding-left: 14px;
+}
+
+/* ── Status banners ──────────────────────────────────────── */
+
+.pt-loading,
+.pt-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--w-color-text-meta, #5a5a5a);
+  font-style: italic;
+}
+
+.pt-error {
+  padding: 12px 16px;
+  background: var(--w-color-warning-50, #fdecea);
+  color: var(--w-color-text-error, #b3261e);
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+/* ── Tree table ──────────────────────────────────────────── */
+/* The .pt-table is a CSS Grid; each .pt-row is a subgrid that spans all
+ * columns, so a `max-content` column (Type) is sized to the widest cell
+ * across the *whole* table rather than per-row. Grid template is set
+ * inline by App.jsx because the locale-column count is dynamic. */
+
+.pt-table {
+  display: grid;
+  border: 1px solid var(--w-color-border-furniture, #ededee);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pt-list {
+  display: contents;
+}
+
+.pt-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
+  min-height: var(--pt-row-height);
+  border-bottom: 1px solid var(--w-color-border-furniture, #ededee);
+}
+
+/* Note: no `.pt-row:last-child { border-bottom: 0 }` rule. Subgrid rows
+ * are nested inside `.pt-list` wrappers (`display: contents`); the DOM
+ * "last child" inside an inner wrapper is *not* the visual last row, so
+ * the rule would strip the border between a parent's last child and the
+ * parent's next sibling. The .pt-table's own border + overflow:hidden
+ * absorbs the extra pixel at the visual bottom. */
+
+.pt-row:hover:not(.pt-row--header),
+.pt-row--menu-active:not(.pt-row--header),
+.pt-row:not(.pt-row--header):has(.pt-row__select:checked) {
+  background: var(--pt-row-hover-bg);
+}
+
+.pt-row--placeholder {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Drag-and-drop reorder.
+ *
+ * - Draggable rows get a grab cursor on the title cell only — that's the
+ *   "handle" zone the user expects to grab. The whole row stays the drop
+ *   target so the drop indicator visually spans every column.
+ * - The dragging source is dimmed so the user can see what's moving.
+ * - Drop indicators use inset box-shadow so they don't change the row's
+ *   layout (border would shift the grid). before/after = thin coloured
+ *   line at top/bottom; inside = full-row tint + outline so it reads as
+ *   "nest under this page". */
+
+.pt-row__drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--w-color-icon-secondary, #6a6c75);
+  opacity: 0.35;
+  cursor: grab;
+  transition: opacity 80ms ease-in;
+}
+
+.pt-row:hover .pt-row__drag-handle,
+.pt-row--menu-active .pt-row__drag-handle {
+  opacity: 0.85;
+}
+
+.pt-row__drag-handle:active {
+  cursor: grabbing;
+}
+
+.pt-row--dragging {
+  opacity: 0.45;
+}
+
+.pt-row--drop-before {
+  box-shadow: inset 0 2px 0 var(--w-color-focus, #2e4cef);
+}
+
+.pt-row--drop-after {
+  box-shadow: inset 0 -2px 0 var(--w-color-focus, #2e4cef);
+}
+
+.pt-row--drop-inside {
+  background: rgba(46, 76, 239, 0.08);
+  outline: 2px solid var(--w-color-focus, #2e4cef);
+  outline-offset: -2px;
+}
+
+.pt-row--header {
+  background: #f3f4f6;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 1px solid var(--w-color-border-furniture, #ededee);
+}
+
+/* Title cell — direct grid item; depth indent lives here so the locale
+ * columns stay aligned regardless of nesting. */
+.pt-row__title-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px 8px;
+  padding-left: calc(8px + var(--pt-depth, 0) * var(--pt-indent));
+}
+
+.pt-row__title-cell--header {
+  padding-left: 8px;
+}
+
+/* Generic cell defaults — width is set by the parent grid template. */
+.pt-row__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+}
+
+.pt-row__cell--menu {
+  color: var(--pt-text-strong);
+  font-weight: 600;
+}
+
+/* Actions cell — anchor for the per-row context menu popover. */
+.pt-row__cell--actions {
+  position: relative;
+}
+
+.pt-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pt-menu__trigger {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  border-radius: 3px;
+  color: var(--pt-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.pt-menu__trigger:hover {
+  background: var(--pt-row-hover-bg, rgba(0, 0, 0, 0.04));
+  color: var(--pt-text-strong, #2e2e2e);
+}
+
+.pt-menu__trigger[aria-expanded="true"] {
+  background: var(--pt-row-hover-bg, rgba(0, 0, 0, 0.06));
+  color: var(--pt-text-strong, #2e2e2e);
+}
+
+.pt-menu__trigger:focus-visible {
+  outline: 2px solid var(--w-color-focus, #036);
+  outline-offset: 1px;
+}
+
+/* Popover — portalled to document.body and positioned via JS so it
+ * escapes the .pt-table's `overflow: hidden`. position/top/left/width
+ * are set inline by ContextMenu.jsx; z-index high enough to sit above
+ * the sticky header and the floating legend. */
+.pt-menu__list {
+  z-index: 100;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--w-color-surface-field, #fff);
+  border: 1px solid var(--w-color-border-furniture, #ededee);
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  font-size: 0.85rem;
+}
+
+.pt-menu__item {
+  display: block;
+  padding: 6px 12px;
+  color: var(--pt-text-strong);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pt-menu__item:hover,
+.pt-menu__item:focus-visible {
+  background: var(--pt-row-hover-bg, rgba(0, 0, 0, 0.04));
+  outline: none;
+  text-decoration: none;
+}
+
+.pt-menu__item--danger {
+  color: var(--w-color-text-error, #b3261e);
+}
+
+.pt-menu__item--danger:hover,
+.pt-menu__item--danger:focus-visible {
+  background: rgba(179, 38, 30, 0.08);
+}
+
+.pt-menu__divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--w-color-border-furniture, #ededee);
+}
+
+/* Dot popover (per-cell). Same chrome as the row context menu. */
+.pt-dotmenu {
+  z-index: 100;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--w-color-surface-field, #fff);
+  border: 1px solid var(--w-color-border-furniture, #ededee);
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  font-size: 0.85rem;
+}
+
+.pt-dotmenu__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 12px;
+  color: var(--pt-text-strong);
+  background: transparent;
+  border: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+}
+
+.pt-dotmenu__item:hover:not(:disabled),
+.pt-dotmenu__item:focus-visible {
+  background: var(--pt-row-hover-bg, rgba(0, 0, 0, 0.04));
+  outline: none;
+  text-decoration: none;
+}
+
+.pt-dotmenu__item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pt-dotmenu__item--danger {
+  color: var(--w-color-text-error, #b3261e);
+}
+
+.pt-dotmenu__item--danger:hover:not(:disabled),
+.pt-dotmenu__item--danger:focus-visible {
+  background: rgba(179, 38, 30, 0.08);
+}
+
+.pt-dotmenu__divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--w-color-border-furniture, #ededee);
+}
+
+/* Make the dot button look identical to the previous link/span. */
+button.pt-dot {
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+button.pt-dot:focus-visible {
+  outline: 2px solid var(--w-color-focus, #036);
+  outline-offset: 1px;
+}
+
+.pt-row__toggle {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+.pt-row__toggle:focus-visible {
+  outline: 2px solid var(--w-color-focus, #036);
+  outline-offset: 1px;
+}
+
+.pt-row__toggle--leaf {
+  visibility: hidden;
+}
+
+.pt-row__toggle--collapsed::before,
+.pt-row__toggle--expanded::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  transform: translate(-50%, -50%);
+}
+
+.pt-row__toggle--collapsed::before {
+  border-width: 5px 0 5px 7px;
+  border-color: transparent transparent transparent currentColor;
+  margin-left: 1px;
+}
+
+.pt-row__toggle--expanded::before {
+  border-width: 7px 5px 0 5px;
+  border-color: currentColor transparent transparent transparent;
+  margin-top: 1px;
+}
+
+.pt-row__toggle--loading::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 2px solid var(--w-color-border-field-default, #c4c4c4);
+  border-top-color: var(--w-color-text-context, #1d1d1d);
+  border-radius: 50%;
+  animation: pt-spin 0.6s linear infinite;
+}
+
+@keyframes pt-spin {
+  to { transform: rotate(360deg); }
+}
+
+.pt-row__title {
+  flex: 1 1 auto;
+  text-decoration: none;
+  color: var(--pt-text-strong);
+  padding: 2px 4px;
+  border-radius: 3px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pt-row__title:hover {
+  color: var(--pt-text-strong);
+  text-decoration: underline;
+}
+
+.pt-row__title:focus-visible {
+  color: var(--pt-text-strong);
+  outline: 2px solid var(--w-color-focus, #036);
+  outline-offset: 1px;
+}
+
+.pt-row__title--placeholder {
+  cursor: default;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2px 4px;
+  overflow: hidden;
+}
+
+.pt-row__title-text {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.pt-row__title-match {
+  background: var(--w-color-warning-50, #fff3bf);
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
+/* Page type column — quiet text, sized by the grid's max-content track
+ * so the widest verbose_name across all rows determines the width and
+ * everything aligns. Left-aligned. */
+.pt-row__cell--type {
+  justify-content: flex-start;
+  padding: 0 8px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--pt-text);
+  white-space: nowrap;
+}
+
+.pt-row--header .pt-row__cell--type {
+  font-weight: 700;
+}
+
+/* ── Status dots ─────────────────────────────────────────── */
+
+.pt-dot {
+  display: inline-block;
+  width: var(--pt-dot-size);
+  height: var(--pt-dot-size);
+  border-radius: 50%;
+  text-decoration: none;
+  position: relative;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+a.pt-dot:focus-visible {
+  outline: 2px solid var(--w-color-focus, #036);
+  outline-offset: 1px;
+}
+
+.pt-dot--published {
+  background: #2c8d57;
+}
+
+.pt-dot--changed {
+  background: #2563eb;
+}
+
+.pt-dot--draft {
+  background: #6b7280;
+}
+
+.pt-dot--alias {
+  background: transparent;
+  border-color: #6b7280;
+  color: #6b7280;
+}
+
+/* Missing translation: dashed border + reduced opacity makes the slot
+ * clearly read as a placeholder rather than a real alias page. */
+.pt-dot--empty {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--w-color-border-field-default, #c4c4c4);
+  color: var(--w-color-text-meta, #9ca3af);
+  opacity: 0.7;
+}
+
+/* Diverged overlay: tiny ↗ arrow at top-right corner. */
+.pt-dot--diverged::after {
+  content: "↗";
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  background: var(--w-color-surface-field, #fff);
+  color: var(--w-color-text-error, #b3261e);
+  font-size: 8px;
+  line-height: 10px;
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+}
+
+/* Out-of-date overlay: amber badge at the bottom-right corner.
+ * Uses ::before so it composes with the diverged ::after on the same dot.
+ * Orthogonal to status — only ever set on published/changed cells. */
+.pt-dot--outdated::before {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  background: var(--w-color-warning-100, #f59e0b);
+  border-radius: 50%;
+  border: 1px solid var(--w-color-surface-field, #fff);
+}
+
+/* ── Orphans ─────────────────────────────────────────────── */
+
+.pt-orphans {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--w-color-border-furniture, #ededee);
+}
+
+.pt-orphans__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--w-color-text-meta, #5a5a5a);
+}
+
+.pt-orphans__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pt-orphans__item + .pt-orphans__item {
+  border-top: 1px solid var(--w-color-border-furniture, #ededee);
+}
+
+.pt-orphans__link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.pt-orphans__link:hover {
+  background: var(--pt-row-hover-bg);
+}
+
+.pt-orphans__lang {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--w-color-surface-menus, #ededee);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.pt-orphans__title-text {
+  flex: 1 1 auto;
+}
+
+.pt-orphans__status {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--w-color-text-meta, #5a5a5a);
+}
+
+.pt-orphans__status--published { color: #2c8d57; }
+.pt-orphans__status--changed { color: #2563eb; }
+.pt-orphans__status--draft { color: #6b7280; }
+
+/* ── Bulk actions ─────────────────────────────────────────── */
+
+.pt-bulk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 4px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.pt-bulk__count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--pt-text-strong);
+}
+
+.pt-bulk__field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.pt-bulk__label {
+  font-size: 0.8rem;
+  color: var(--pt-text);
+}
+
+.pagetree .pt-bulk__select {
+  padding: 4px 8px;
+  border: 1px solid var(--w-color-border-field-default, #c4c4c4);
+  border-radius: 3px;
+  background: var(--w-color-surface-field, #fff);
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--pt-text-strong);
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.pt-bulk__btn {
+  border: 1px solid var(--w-color-border-furniture, #c4c4c4);
+  background: var(--w-color-surface-field, #fff);
+  color: var(--pt-text-strong);
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.pt-bulk__btn:hover:not(:disabled) {
+  background: var(--pt-row-hover-bg, rgba(0, 0, 0, 0.04));
+}
+
+.pt-bulk__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pt-bulk__btn--primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.pt-bulk__btn--primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.pt-bulk__btn--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.pt-flash {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pt-flash__dismiss {
+  margin-left: auto;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.pt-row__cell--select {
+  /* Width set by inline grid template; nudge the checkbox slightly off
+   * the left edge so it doesn't visually butt up against the table border. */
+  justify-content: flex-start;
+  padding-left: 10px;
+}
+
+.pt-row__select {
+  margin: 0;
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+/* Compact mode is driven by the JS matchMedia hook (`COMPACT_QUERY`):
+ * `useMatchMedia('(max-width: 900px)')` toggles the React render of the
+ * Type column off and removes its grid track; column widths in the inline
+ * grid template also shrink. The CSS below tightens spacing on the same
+ * breakpoint so the table reads cleanly on tablets and split-screen widths. */
+
+@media (max-width: 900px) {
+  .pt-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .pt-row__title-cell {
+    padding-left: calc(6px + var(--pt-depth, 0) * 16px);
+    padding-right: 4px;
+  }
+}
+
+/* ── Legend ──────────────────────────────────────────────── */
+/* Floats fixed in the bottom-right corner — always visible while
+ * scrolling. Subtle surface + shadow so it stays legible over content. */
+
+/* Collapsed: a small round "?" button. */
+.pt-legend-toggle {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 50;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--w-color-border-furniture, #ededee);
+  background: var(--w-color-surface-field, #fff);
+  color: var(--pt-text-strong, #2e2e2e);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.pt-legend-toggle:hover {
+  background: var(--pt-row-hover-bg, rgba(0, 0, 0, 0.04));
+}
+
+.pt-legend-toggle:focus-visible {
+  outline: 2px solid var(--w-color-focus, #036);
+  outline-offset: 2px;
+}
+
+/* Expanded panel. */
+.pt-legend {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 50;
+  background: var(--w-color-surface-field, #fff);
+  border: 1px solid var(--w-color-border-furniture, #ededee);
+  border-radius: 6px;
+  padding: 12px 32px 12px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-size: 0.8rem;
+  max-width: 320px;
+}
+
+.pt-legend__close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--pt-text);
+  cursor: pointer;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.pt-legend__close:hover {
+  background: var(--pt-row-hover-bg, rgba(0, 0, 0, 0.04));
+  color: var(--pt-text-strong);
+}
+
+.pt-legend__close:focus-visible {
+  outline: 2px solid var(--w-color-focus, #036);
+  outline-offset: 1px;
+}
+
+.pt-legend__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pt-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* room for the diverged ↗ overlay */
+  padding-top: 4px;
+}
+
+.pt-legend__label {
+  color: var(--pt-text);
+  line-height: 1.3;
+}

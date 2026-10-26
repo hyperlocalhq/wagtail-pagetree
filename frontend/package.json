@@ -1,0 +1,13 @@
+{
+  "name": "@hyperlocal/wagtail-pagetree-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "React/JSX source for the wagtail-pagetree admin bundle.",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

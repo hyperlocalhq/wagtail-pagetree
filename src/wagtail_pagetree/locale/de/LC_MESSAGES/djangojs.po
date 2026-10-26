@@ -1,0 +1,368 @@
+# German translations for wagtail-pagetree (frontend).
+# This file is distributed under the same license as the wagtail-pagetree package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wagtail-pagetree\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-26 08:28+0200\n"
+"PO-Revision-Date: 2026-10-26 00:00+0000\n"
+"Last-Translator: Hyperlocal HQ\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s %(locale)s page published."
+msgid_plural "%(count)s %(locale)s pages published."
+msgstr[0] "%(count)s %(locale)s-Seite veröffentlicht."
+msgstr[1] "%(count)s %(locale)s-Seiten veröffentlicht."
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s page published."
+msgid_plural "%(count)s pages published."
+msgstr[0] "%(count)s Seite veröffentlicht."
+msgstr[1] "%(count)s Seiten veröffentlicht."
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s %(locale)s page unpublished."
+msgid_plural "%(count)s %(locale)s pages unpublished."
+msgstr[0] "Veröffentlichung von %(count)s %(locale)s-Seite aufgehoben."
+msgstr[1] "Veröffentlichung von %(count)s %(locale)s-Seiten aufgehoben."
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s page unpublished."
+msgid_plural "%(count)s pages unpublished."
+msgstr[0] "Veröffentlichung von %(count)s Seite aufgehoben."
+msgstr[1] "Veröffentlichung von %(count)s Seiten aufgehoben."
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s page moved."
+msgid_plural "%(count)s pages moved."
+msgstr[0] "%(count)s Seite verschoben."
+msgstr[1] "%(count)s Seiten verschoben."
+
+#: frontend/src/components/App.jsx
+msgid "No pages were changed."
+msgstr "Es wurden keine Seiten geändert."
+
+#: frontend/src/components/App.jsx
+#, javascript-format
+msgid "%s denied."
+msgstr "%s abgelehnt."
+
+#: frontend/src/components/App.jsx
+#, javascript-format
+msgid "%s translation not moved (no target or diverged tree)."
+msgid_plural "%s translations not moved (no target or diverged tree)."
+msgstr[0] "%s Übersetzung nicht verschoben (kein Ziel oder abweichender Baum)."
+msgstr[1] ""
+"%s Übersetzungen nicht verschoben (kein Ziel oder abweichender Baum)."
+
+#: frontend/src/components/App.jsx
+#, javascript-format
+msgid "%s skipped (no translation or already in target state)."
+msgstr "%s übersprungen (keine Übersetzung oder bereits im Zielzustand)."
+
+#: frontend/src/components/App.jsx
+#, javascript-format
+msgid "%s errored."
+msgstr "%s fehlgeschlagen."
+
+#: frontend/src/components/BulkToolbar.jsx
+msgid "Bulk actions"
+msgstr "Massenaktionen"
+
+#: frontend/src/components/BulkToolbar.jsx
+#, javascript-format
+msgid "%s page selected"
+msgid_plural "%s pages selected"
+msgstr[0] "%s Seite ausgewählt"
+msgstr[1] "%s Seiten ausgewählt"
+
+#: frontend/src/components/BulkToolbar.jsx
+msgid "Locale:"
+msgstr "Sprache:"
+
+#: frontend/src/components/BulkToolbar.jsx
+#: frontend/src/components/StatusDot.jsx
+msgid "Publish"
+msgstr "Veröffentlichen"
+
+#: frontend/src/components/BulkToolbar.jsx
+#: frontend/src/components/StatusDot.jsx
+msgid "Unpublish"
+msgstr "Veröffentlichung aufheben"
+
+#: frontend/src/components/BulkToolbar.jsx
+msgid "Clear"
+msgstr "Zurücksetzen"
+
+#: frontend/src/components/ContextMenu.jsx
+msgid "Page actions"
+msgstr "Seitenaktionen"
+
+#: frontend/src/components/Header.jsx
+msgid "Title"
+msgstr "Titel"
+
+#: frontend/src/components/Header.jsx
+msgid "Type"
+msgstr "Typ"
+
+#: frontend/src/components/Header.jsx
+msgid "Menu"
+msgstr "Menü"
+
+#: frontend/src/components/Legend.jsx
+msgid "Published — live, no pending edits"
+msgstr "Veröffentlicht – live, keine ausstehenden Änderungen"
+
+#: frontend/src/components/Legend.jsx
+msgid "Changed — live, but has unpublished edits"
+msgstr "Geändert – live, aber mit unveröffentlichten Änderungen"
+
+#: frontend/src/components/Legend.jsx
+msgid "Draft — never been published"
+msgstr "Entwurf – noch nie veröffentlicht"
+
+#: frontend/src/components/Legend.jsx
+msgid "Alias — points to another page (no own content)"
+msgstr "Alias – verweist auf eine andere Seite (kein eigener Inhalt)"
+
+#: frontend/src/components/Legend.jsx
+msgid "Missing — no translation in this locale"
+msgstr "Fehlt – keine Übersetzung in dieser Sprache"
+
+#: frontend/src/components/Legend.jsx
+msgid "Diverged — parent page differs from primary tree"
+msgstr "Abweichend – übergeordnete Seite weicht vom Hauptbaum ab"
+
+#: frontend/src/components/Legend.jsx
+msgid "Needs update — source changed since last translation"
+msgstr "Aktualisierung nötig – Quelle seit der letzten Übersetzung geändert"
+
+#: frontend/src/components/Legend.jsx
+msgid "Show status legend"
+msgstr "Statuslegende anzeigen"
+
+#: frontend/src/components/Legend.jsx
+msgid "Status legend"
+msgstr "Statuslegende"
+
+#: frontend/src/components/Legend.jsx
+msgid "Hide status legend"
+msgstr "Statuslegende ausblenden"
+
+#: frontend/src/components/Legend.jsx
+msgid "Hide"
+msgstr "Ausblenden"
+
+#: frontend/src/components/Node.jsx
+msgid "Drag to reorder"
+msgstr "Zum Umsortieren ziehen"
+
+#: frontend/src/components/Node.jsx
+msgid "Shown in menus"
+msgstr "In Menüs angezeigt"
+
+#: frontend/src/components/Node.jsx
+msgid "Hidden from menus"
+msgstr "In Menüs ausgeblendet"
+
+#: frontend/src/components/Node.jsx
+#, javascript-format
+msgid "Select %s"
+msgstr "%s auswählen"
+
+#: frontend/src/components/Node.jsx
+msgid "Add child page"
+msgstr "Unterseite hinzufügen"
+
+#: frontend/src/components/Node.jsx frontend/src/components/StatusDot.jsx
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: frontend/src/components/Node.jsx frontend/src/components/StatusDot.jsx
+msgid "View live"
+msgstr "Live anzeigen"
+
+#: frontend/src/components/Node.jsx frontend/src/components/StatusDot.jsx
+msgid "Copy"
+msgstr "Kopieren"
+
+#: frontend/src/components/Node.jsx frontend/src/components/StatusDot.jsx
+msgid "Delete"
+msgstr "Löschen"
+
+#: frontend/src/components/Orphans.jsx frontend/src/components/StatusDot.jsx
+#: frontend/src/components/Toolbar.jsx
+msgid "Published"
+msgstr "Veröffentlicht"
+
+#: frontend/src/components/Orphans.jsx frontend/src/components/Toolbar.jsx
+msgid "Changed"
+msgstr "Geändert"
+
+#: frontend/src/components/Orphans.jsx frontend/src/components/StatusDot.jsx
+#: frontend/src/components/Toolbar.jsx
+msgid "Draft"
+msgstr "Entwurf"
+
+#: frontend/src/components/Orphans.jsx frontend/src/components/StatusDot.jsx
+#: frontend/src/components/Toolbar.jsx frontend/src/i18n.js
+msgid "Alias"
+msgstr "Alias"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Changed (unpublished edits)"
+msgstr "Geändert (unveröffentlichte Änderungen)"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "No translation"
+msgstr "Keine Übersetzung"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "source changed since last sync; publish or sync the source page"
+msgstr ""
+"Quelle seit der letzten Synchronisierung geändert; Quellseite "
+"veröffentlichen oder synchronisieren"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "%(locale)s under “%(from)s”, expected under “%(expected)s”"
+msgstr "%(locale)s unter „%(from)s“, erwartet unter „%(expected)s“"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "translated parent differs"
+msgstr "übersetzte übergeordnete Seite weicht ab"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Sync translated pages"
+msgstr "Übersetzte Seiten synchronisieren"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Translate this page"
+msgstr "Diese Seite übersetzen"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Convert to regular page"
+msgstr "In reguläre Seite umwandeln"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Create translation here"
+msgstr "Übersetzung hier erstellen"
+
+#: frontend/src/components/Toolbar.jsx
+msgid "Missing"
+msgstr "Fehlt"
+
+#: frontend/src/components/Toolbar.jsx
+msgid "Needs update"
+msgstr "Aktualisierung nötig"
+
+#: frontend/src/components/Toolbar.jsx
+msgid "Diverged"
+msgstr "Abweichend"
+
+#: frontend/src/i18n.js
+msgid "Page Tree"
+msgstr "Seitenbaum"
+
+#: frontend/src/i18n.js
+msgid "Loading…"
+msgstr "Wird geladen…"
+
+#: frontend/src/i18n.js
+msgid "Search pages…"
+msgstr "Seiten durchsuchen…"
+
+#: frontend/src/i18n.js
+msgid "Search query is too long."
+msgstr "Die Suchanfrage ist zu lang."
+
+#: frontend/src/i18n.js
+msgid "Too many matches; please refine the query."
+msgstr "Zu viele Treffer; bitte die Suche eingrenzen."
+
+#: frontend/src/i18n.js
+msgid "No pages match this query."
+msgstr "Keine Seiten entsprechen dieser Suche."
+
+#: frontend/src/i18n.js
+msgid "Filter status"
+msgstr "Status filtern"
+
+#: frontend/src/i18n.js
+msgid "No filter"
+msgstr "Kein Filter"
+
+#: frontend/src/i18n.js
+msgid "Filter locale"
+msgstr "Sprache filtern"
+
+#: frontend/src/i18n.js
+msgid "in"
+msgstr "in"
+
+#: frontend/src/i18n.js
+msgid "No pages match this filter."
+msgstr "Keine Seiten entsprechen diesem Filter."
+
+#: frontend/src/i18n.js
+msgid "Page type"
+msgstr "Seitentyp"
+
+#: frontend/src/i18n.js
+msgid "All page types"
+msgstr "Alle Seitentypen"
+
+#: frontend/src/i18n.js
+msgid "Failed to load pages."
+msgstr "Seiten konnten nicht geladen werden."
+
+#: frontend/src/i18n.js
+msgid "Retry"
+msgstr "Erneut versuchen"
+
+#: frontend/src/i18n.js
+msgid "Primary locale"
+msgstr "Primärsprache"
+
+#: frontend/src/i18n.js
+msgid "Pages without"
+msgstr "Seiten ohne"
+
+#: frontend/src/i18n.js
+msgid "Expand"
+msgstr "Aufklappen"
+
+#: frontend/src/i18n.js
+msgid "Collapse"
+msgstr "Zuklappen"
+
+#: frontend/src/i18n.js
+msgid "(untitled)"
+msgstr "(ohne Titel)"
+
+#: frontend/src/i18n.js
+msgid "You can't edit this page."
+msgstr "Sie können diese Seite nicht bearbeiten."
+
+#: frontend/src/i18n.js
+msgid "Create translation"
+msgstr "Übersetzung erstellen"
+
+#: frontend/src/i18n.js
+msgid "Translation lives at a different position"
+msgstr "Übersetzung befindet sich an einer anderen Position"
+
+#: frontend/src/i18n.js
+msgid "alias"
+msgstr "Alias"
+
+#: frontend/src/i18n.js
+msgid "Loading children…"
+msgstr "Unterseiten werden geladen…"

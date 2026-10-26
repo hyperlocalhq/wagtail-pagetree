@@ -1,0 +1,10 @@
+include README.md
+include LICENSE
+recursive-include src/wagtail_pagetree/templates *.html
+recursive-include src/wagtail_pagetree/static *
+global-exclude __pycache__
+global-exclude *.py[cod]
+recursive-include src/wagtail_pagetree/locale *.po *.mo
+include tox.ini
+recursive-include tests *.py
+recursive-include scripts *.sh

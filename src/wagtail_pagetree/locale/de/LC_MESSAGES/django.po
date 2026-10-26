@@ -1,0 +1,25 @@
+# German translations for wagtail-pagetree.
+# This file is distributed under the same license as the wagtail-pagetree package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wagtail-pagetree\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-26 01:28-0500\n"
+"PO-Revision-Date: 2026-10-26 00:00+0000\n"
+"Last-Translator: Hyperlocal HQ\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/wagtail_pagetree/page_tree.html:4 views.py:66 views.py:68
+#: viewsets.py:18
+msgid "Page Tree"
+msgstr "Seitenbaum"
+
+#: templates/wagtail_pagetree/page_tree.html:18
+msgid "JavaScript is required to use the Page Tree."
+msgstr "Für den Seitenbaum wird JavaScript benötigt."

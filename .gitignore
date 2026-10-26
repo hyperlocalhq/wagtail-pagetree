@@ -1,0 +1,11 @@
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+frontend/node_modules/
+.venv/
+.tox/
+.coverage
+htmlcov/
