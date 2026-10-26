@@ -72,11 +72,12 @@ npm run check                    # drift gate: committed bundle must match sourc
 
 ## Release
 
-```bash
-# bump version in pyproject.toml and src/wagtail_pagetree/__init__.py
-uv build
-uv publish                       # needs a PyPI token or trusted publishing
-```
+1. Bump the version in `pyproject.toml` and `src/wagtail_pagetree/__init__.py`.
+2. Commit, then tag and push: `git tag v0.1.0 && git push origin v0.1.0`.
+
+The `Release` workflow runs the test matrix, builds, publishes to TestPyPI,
+then PyPI (trusted publishing, no stored token) and creates a GitHub release.
+It refuses to publish when the tag and the two version strings disagree.
 
 ## Layout
 
