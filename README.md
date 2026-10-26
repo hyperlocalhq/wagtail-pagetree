@@ -8,6 +8,8 @@ endpoints, supports drag-and-drop reordering with cascade translations,
 context menu and bulk actions, respects `PagePermissionPolicy`, and scales to
 large trees (P95 < 200 ms for 500-page corpora).
 
+![Page Tree in the Wagtail admin: German primary tree with per-locale status dots and the row menu open](https://raw.githubusercontent.com/hyperlocalhq/wagtail-pagetree/main/docs/page-tree.png)
+
 ## Install
 
 ```bash
