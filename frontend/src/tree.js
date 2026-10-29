@@ -1,7 +1,7 @@
 // Pure helpers for tree-building, expansion state, and search highlighting.
 // No React in here — easier to reason about and trivially testable.
 
-const INITIAL_AUTO_EXPAND_DEPTH = 2;
+const INITIAL_AUTO_EXPAND_DEPTH = 1;
 
 // Group nodes by parent_id. Nodes with parent_id === null are roots.
 // Returns Map<parentId|null, Node[]> preserving the original order
@@ -19,7 +19,7 @@ export function groupByParent(nodes) {
 
 // Set of node ids to auto-expand on first render. Walks the tree and
 // expands every node at depth < target so the user lands on a usable
-// view (depth 2 visible by default per the M2 acceptance criteria).
+// view: the top-level pages (site homepages) open, showing their children.
 export function defaultExpansion(nodes, depth = INITIAL_AUTO_EXPAND_DEPTH) {
   const min = Math.min(...nodes.map((n) => n.depth));
   const result = new Set();
