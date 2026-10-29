@@ -80,6 +80,7 @@ def search_primary(
     qs = Page.objects.filter(
         locale=locale,
         id__in=permitted,
+        depth__gt=1,
         title__icontains=query,
     )
     if page_type_id is not None:
@@ -194,6 +195,7 @@ def filter_page_type(
         Page.objects.filter(
             locale=locale,
             id__in=permitted,
+            depth__gt=1,
             content_type_id=page_type_id,
         )
         .values(*PRIMARY_FIELDS)

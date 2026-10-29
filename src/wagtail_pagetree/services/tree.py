@@ -92,12 +92,14 @@ def fetch_primary_rows(locale, permitted: set[int]) -> list[dict]:
     """Fetch primary-locale Page rows the user is allowed to see.
 
     Returns a list of plain dicts ordered by ``path``. Uses ``values()`` for
-    ORM-overhead-free access.
+    ORM-overhead-free access. The tree root (depth 1) is left out: it's
+    Wagtail's bare container page, not something editors work on, so its
+    children (the site homepages) are the top-level rows.
     """
     from wagtail.models import Page
 
     return list(
-        Page.objects.filter(locale=locale, id__in=permitted)
+        Page.objects.filter(locale=locale, id__in=permitted, depth__gt=1)
         .values(*PRIMARY_FIELDS)
         .order_by("path")
     )
@@ -217,7 +219,9 @@ def fetch_orphans(
 ) -> list[dict]:
     """Translations whose primary-locale counterpart is missing or denied.
 
-    Filtered by the *editable* set, not the broader permitted set.
+    Filtered by the *editable* set, not the broader permitted set. The tree
+    root is skipped like in ``fetch_primary_rows``: it only exists in one
+    locale, so it would otherwise show up as untranslated.
     Wagtail's ``explorable_instances`` unions in ancestor pages of every
     permitted page so deep editors can navigate down — those ancestors are
     explorable but not editable, and they would leak into "Pages without
@@ -226,7 +230,7 @@ def fetch_orphans(
     from wagtail.models import Page
 
     qs = (
-        Page.objects.filter(id__in=editable)
+        Page.objects.filter(id__in=editable, depth__gt=1)
         .exclude(locale_id=primary_locale_id)
         .exclude(translation_key__in=primary_translation_keys)
     )

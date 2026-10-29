@@ -8,6 +8,11 @@
   <link rel="stylesheet" href="{% static 'wagtail_pagetree/css/styles.css' %}">
 {% endblock %}
 
+{% block main_header %}
+  {% trans "Add top-level page" as add_top_level_text %}
+  {% include "wagtailadmin/shared/header.html" with title=page_title icon=header_icon action_url=add_top_level_url action_text=add_top_level_text only %}
+{% endblock %}
+
 {% block main_content %}
   <div id="pagetree-root"
        data-locale="{{ request.GET.locale|default:'' }}"

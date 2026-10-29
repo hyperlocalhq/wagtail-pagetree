@@ -191,14 +191,12 @@ def _page_type_options(nodes: list[dict]) -> list[dict]:
     """Page-type filter choices: the types of the tree's non-placeholder nodes.
 
     Placeholder nodes carry no ``page_type_id``, so types that only occur
-    on navigation-only ancestors are never offered. The tree root (depth 1)
-    is skipped too: it's Wagtail's bare ``Page``, which would otherwise add an
-    option that only ever matches the root. Sorted by display name.
+    on navigation-only ancestors are never offered. Sorted by display name.
     """
     names = {
         node["page_type_id"]: node.get("page_type") or ""
         for node in nodes
-        if "page_type_id" in node and node["depth"] > 1
+        if "page_type_id" in node
     }
     return [
         {"id": type_id, "name": name}
@@ -339,18 +337,15 @@ def _node_dict(
                 primary_parent_title=primary_parent_title,
                 site_roots=site_roots,
             )
-            # wagtail-localize source actions live on the primary cell only,
-            # and never on the tree root (matches wagtail-localize's own
-            # ``not page.is_root()`` gate — the root isn't translatable).
-            is_root = row.get("depth") == 1
-            source_id = None if is_root else (sync_ids or {}).get(translation_key)
+            # wagtail-localize source actions live on the primary cell only.
+            source_id = (sync_ids or {}).get(translation_key)
             if source_id is not None:
                 url = _localize_url(
                     "wagtail_localize:update_translations", source_id
                 )
                 if url:
                     cell["sync_translations_url"] = url
-            if not is_root and translation_key in translatable_keys:
+            if translation_key in translatable_keys:
                 url = _localize_url(
                     "wagtail_localize:submit_page_translation", row["id"]
                 )

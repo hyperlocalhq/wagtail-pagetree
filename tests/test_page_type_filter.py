@@ -108,9 +108,8 @@ class PageTypeFilterAPITest(TestCase):
         self.assertIn(self.other_ct.id, ids)
 
 
-def test_page_type_options_skip_placeholders_and_root_and_sort_by_name():
+def test_page_type_options_skip_placeholders_and_sort_by_name():
     nodes = [
-        {"id": 1, "depth": 1, "page_type_id": 1, "page_type": "Page"},
         {"id": 5, "depth": 2, "is_placeholder": True},
         {"id": 2, "depth": 3, "page_type_id": 20, "page_type": "news page"},
         {"id": 3, "depth": 3, "page_type_id": 10, "page_type": "Event page"},

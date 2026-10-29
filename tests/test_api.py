@@ -72,6 +72,47 @@ class AdminPageTest(_SuperuserClientMixin, TestCase):
         self.assertContains(response, "Seitenbaum")
 
 
+class RootHiddenTest(_SuperuserClientMixin, TestCase):
+    """Wagtail's tree root never shows up; the homepages are top level."""
+
+    def test_tree_starts_below_the_root(self):
+        pages = self._get("pagetree:api-tree", "locale=de").json()["pages"]
+        ids = {page["id"] for page in pages}
+        self.assertNotIn(self.root.id, ids)
+        home = next(page for page in pages if page["id"] == self.home_de.id)
+        self.assertIsNone(home["parent_id"])
+
+    def test_root_is_not_an_orphan_of_another_locale(self):
+        orphans = self._get("pagetree:api-tree", "locale=en").json()["orphans"]
+        self.assertNotIn(self.root.id, {orphan["id"] for orphan in orphans})
+
+    def test_search_never_matches_the_root(self):
+        body = self._get(
+            "pagetree:api-tree", f"locale={self.root.locale.language_code}"
+            f"&search={self.root.title}"
+        ).json()
+        self.assertNotIn(self.root.id, {page["id"] for page in body["matches"]})
+
+    def test_superuser_gets_add_top_level_button(self):
+        response = self._get("pagetree:index")
+        self.assertContains(response, self._add_top_level_url())
+        self.assertContains(response, "Seite auf oberster Ebene hinzufügen")
+
+    def test_editor_without_root_permission_gets_no_button(self):
+        group = Group.objects.create(name="pt-api-no-root")
+        _grant_admin(group)
+        GroupPagePermission.objects.create(
+            group=group, page=self.home_de, permission_type="add"
+        )
+        self.client.force_login(_make_user("pt-api-no-root", group))
+        response = self._get("pagetree:index")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self._add_top_level_url())
+
+    def _add_top_level_url(self):
+        return reverse("wagtailadmin_pages:add_subpage", args=[self.root.id])
+
+
 class TreeAPIErrorTest(_SuperuserClientMixin, TestCase):
     def test_search_too_long(self):
         response = self._get("pagetree:api-tree", "search=" + "x" * 201)

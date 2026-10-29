@@ -47,6 +47,7 @@ from .services.tree import (
     PRIMARY_FIELDS,
 )
 from .services.presenters import (
+    _add_child_url,
     _node_dict,
     _index_matrix,
     _locale_summary,
@@ -66,6 +67,11 @@ class PageTreeView(TemplateView):
         context["header_title"] = _("Page Tree")
         context["header_icon"] = "list-ul"
         context["page_title"] = _("Page Tree")
+        # The tree hides Wagtail's root page, so adding a page directly under
+        # it (a new site homepage) gets a header button instead.
+        root = Page.get_first_root_node()
+        if root and root.permissions_for_user(self.request.user).can_add_subpage():
+            context["add_top_level_url"] = _add_child_url(root.id)
         return context
 
 
