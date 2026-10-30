@@ -9,6 +9,7 @@ import { ApiError, getJson, postJson } from "../api.js";
 import { childrenUrl } from "../urls.js";
 import { ancestorIds, defaultExpansion, groupByParent } from "../tree.js";
 import { handleTreeKeyDown } from "../keyboard.js";
+import { loadExpanded, loadViewState, saveExpanded, saveViewState } from "../state.js";
 import { COMPACT_QUERY, useMatchMedia } from "../responsive.js";
 import { gettext, interpolate, ngettext, t } from "../i18n.js";
 
@@ -31,11 +32,20 @@ function dedupeNodesById(existing, incoming) {
 }
 
 function App({ config }) {
+  // View state from the last visit in this tab (state.js). A ?locale= in the
+  // URL wins; ?clear_filters=1 drops the stored search and filters.
+  const [restored] = useState(() => {
+    const stored = loadViewState();
+    return config.clearFilters ? { locale: stored.locale } : stored;
+  });
+
   const [loadedNodes, setLoadedNodes] = useState([]);
   const [expandedIds, setExpandedIds] = useState(() => new Set());
   const [loadingIds, setLoadingIds] = useState(() => new Set());
-  const [searchQuery, setSearchQuery] = useState("");
-  const [primaryLocale, setPrimaryLocale] = useState(config.initialLocale || "");
+  const [searchQuery, setSearchQuery] = useState(restored.search || "");
+  const [primaryLocale, setPrimaryLocale] = useState(
+    config.initialLocale || restored.locale || "",
+  );
 
   const [locales, setLocales] = useState([]);
   const [orphans, setOrphans] = useState([]);
@@ -47,14 +57,24 @@ function App({ config }) {
   // statuses or a flag (outdated/diverged), or "" when off. `filterLocale` is
   // the locale the status applies to (defaults to the primary locale).
   // Mutually exclusive with the text search; rendered through the matches path.
-  const [filterLocale, setFilterLocale] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterLocale, setFilterLocale] = useState(restored.filterLocale || "");
+  const [filterStatus, setFilterStatus] = useState(restored.filterStatus || "");
 
   // Page-type filter: a content type id (string) or "" when off. Combines with
   // either the text search or the status filter. `pageTypes` (the choices)
   // comes with the unfiltered tree payload and is kept while filtering.
   const [pageTypes, setPageTypes] = useState([]);
-  const [filterPageType, setFilterPageType] = useState("");
+  const [filterPageType, setFilterPageType] = useState(restored.filterPageType || "");
+
+  // Per-locale count of tree rows without a page, from the unfiltered tree
+  // payload; kept while filtering. Drives the coverage in the header.
+  const [coverage, setCoverage] = useState(null);
+
+  // ?reveal=<id>: expand down to that row and highlight it, once. The ref
+  // holds the request until a payload arrives; `revealedId` the row to
+  // scroll to once it's rendered.
+  const revealRef = useRef(config.revealId);
+  const [revealedId, setRevealedId] = useState(null);
 
   // Bulk selection state. Set of page ids the user has ticked.
   const [selectedIds, setSelectedIds] = useState(() => new Set());
@@ -69,11 +89,29 @@ function App({ config }) {
   const [dragOver, setDragOver] = useState(null);
 
   // Debounced server search query (decoupled from input value).
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery.trim());
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedQuery(searchQuery.trim()), SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(id);
   }, [searchQuery]);
+
+  useEffect(() => {
+    saveViewState({
+      locale: primaryLocale,
+      search: debouncedQuery,
+      filterStatus,
+      filterLocale,
+      filterPageType,
+    });
+  }, [primaryLocale, debouncedQuery, filterStatus, filterLocale, filterPageType]);
+
+  // The reveal / locale / clear_filters params are consumed on load; drop
+  // them so a reload shows the restored state rather than replaying them.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    ["locale", "reveal", "clear_filters"].forEach((key) => url.searchParams.delete(key));
+    window.history.replaceState(window.history.state, "", url);
+  }, []);
 
   // A filter (text search, locale×status and/or page type) is active — all
   // render through the matches path and hide orphans.
@@ -127,32 +165,59 @@ function App({ config }) {
       .then((payload) => {
         if (ctrl.signal.aborted) return;
         setLocales(payload.locales || []);
+        setPageTypes(payload.page_types || []);
         if (!primaryLocale && payload.primary_locale) {
           setPrimaryLocale(payload.primary_locale);
         }
 
+        let nodes;
+        let expand;
         if (filterActive) {
           // Filtered payload: list of matches. Parents not in the match set
           // resolve to parent_id=null server-side, so matches render as a
           // flat list — exactly what "show me the stale pages" wants.
-          const matches = payload.matches || [];
-          setLoadedNodes(matches);
+          nodes = payload.matches || [];
           setOrphans([]);
           // Auto-expand any ancestors that *are* within the match set.
-          const expand = new Set();
-          for (const m of matches) {
-            for (const a of ancestorIds(matches, m.id)) expand.add(a);
+          expand = new Set();
+          for (const m of nodes) {
+            for (const a of ancestorIds(nodes, m.id)) expand.add(a);
           }
-          setExpandedIds(expand);
         } else {
-          setLoadedNodes(payload.pages || []);
+          nodes = payload.pages || [];
           setOrphans(payload.orphans || []);
-          setPageTypes(payload.page_types || []);
-          setExpandedIds(defaultExpansion(payload.pages || []));
+          setCoverage(payload.coverage || null);
+          // Reopen the branches the user had open in this locale.
+          const loaded = new Set(nodes.map((n) => n.id));
+          const saved = loadExpanded(payload.primary_locale);
+          expand = saved
+            ? new Set([...saved].filter((id) => loaded.has(id)))
+            : defaultExpansion(nodes);
         }
+
+        if (revealRef.current != null) {
+          const target = nodes.find((n) => n.id === revealRef.current);
+          revealRef.current = null;
+          if (target) {
+            for (const a of ancestorIds(nodes, target.id)) expand.add(a);
+            // Open the row itself too: after "Add child page" the new
+            // page is one of its children.
+            expand.add(target.id);
+            if (!filterActive) saveExpanded(payload.primary_locale, expand);
+            setRevealedId(target.id);
+          }
+        }
+        setLoadedNodes(nodes);
+        setExpandedIds(expand);
       })
       .catch((err) => {
         if (err.name === "AbortError") return;
+        // A remembered locale may have been deleted since: fall back to
+        // the server's default instead of failing for good.
+        if (err.code === "invalid_locale" && primaryLocale) {
+          setPrimaryLocale("");
+          return;
+        }
         setError(err);
       })
       .finally(() => {
@@ -167,8 +232,8 @@ function App({ config }) {
   //
   // Stable callback ref so children's React.memo holds. We read the current
   // tree state through a ref to avoid recreating on every state change.
-  const stateRef = useRef({ loadedNodes, primaryLocale, loadingIds });
-  stateRef.current = { loadedNodes, primaryLocale, loadingIds };
+  const stateRef = useRef({ loadedNodes, primaryLocale, loadingIds, searchMode });
+  stateRef.current = { loadedNodes, primaryLocale, loadingIds, searchMode };
 
   const fetchChildren = useCallback(
     async (pageId) => {
@@ -200,19 +265,23 @@ function App({ config }) {
   const onToggle = useCallback(
     (pageId) => {
       setExpandedIds((prev) => {
+        const { loadedNodes: nodes, primaryLocale: locale, searchMode: filtered } =
+          stateRef.current;
         const next = new Set(prev);
         if (next.has(pageId)) {
           next.delete(pageId);
-          return next;
+        } else {
+          next.add(pageId);
+          // If this parent has no loaded children, fetch them.
+          const hasChildren = nodes.some((n) => n.parent_id === pageId);
+          if (!hasChildren) {
+            // Fire-and-forget; setLoadingIds inside fetchChildren will trigger spinner.
+            fetchChildren(pageId);
+          }
         }
-        next.add(pageId);
-        // If this parent has no loaded children, fetch them.
-        const { loadedNodes: nodes } = stateRef.current;
-        const hasChildren = nodes.some((n) => n.parent_id === pageId);
-        if (!hasChildren) {
-          // Fire-and-forget; setLoadingIds inside fetchChildren will trigger spinner.
-          fetchChildren(pageId);
-        }
+        // Filtered views auto-expand their matches; only the full tree's
+        // open branches are worth restoring.
+        if (!filtered) saveExpanded(locale, next);
         return next;
       });
     },
@@ -240,6 +309,14 @@ function App({ config }) {
       setSearchQuery("");
       setSelectedIds(new Set());
     }
+  }, []);
+
+  // Coverage in the header: list the pages missing in that locale.
+  const onShowMissing = useCallback((code) => {
+    setSearchQuery("");
+    setFilterLocale(code);
+    setFilterStatus("empty");
+    setSelectedIds(new Set());
   }, []);
 
   const onLocaleChange = useCallback((value) => {
@@ -402,6 +479,17 @@ function App({ config }) {
 
   const byParent = useMemo(() => groupByParent(loadedNodes), [loadedNodes]);
 
+  // Scroll the revealed row into view once it's rendered. The highlight is
+  // a one-off CSS animation, so a class set on the DOM node is enough.
+  useEffect(() => {
+    if (revealedId == null || initialLoading) return;
+    const row = document.querySelector(`.pagetree [data-pt-row-id="${revealedId}"]`);
+    if (!row) return;
+    row.scrollIntoView({ block: "center" });
+    row.classList.add("pt-row--revealed");
+    setRevealedId(null);
+  }, [revealedId, initialLoading, loadedNodes]);
+
   // Compact mode hides the Type column on narrow viewports (tablets / split
   // screens) so the title stays readable.
   const compact = useMatchMedia(COMPACT_QUERY);
@@ -471,7 +559,13 @@ function App({ config }) {
             ].join(" "),
           }}
         >
-          <Header locales={locales} compact={compact} />
+          <Header
+            locales={locales}
+            compact={compact}
+            primaryLocale={primaryLocale}
+            coverage={coverage}
+            onShowMissing={onShowMissing}
+          />
           <NodeList
             parentId={null}
             byParent={byParent}

@@ -27,6 +27,7 @@ from .services.permissions import editable_ids, permitted_ids, placeholder_ids
 from .services.presenters import (
     build_search_payload,
     build_tree_payload,
+    page_type_choices,
 )
 from .services.search import (
     FILTER_STATUSES,
@@ -321,6 +322,7 @@ class TreeAPIView(View):
             placeholder=placeholder,
             can_submit_translation=can_submit_translation,
         )
+        payload["page_types"] = page_type_choices(locale, permitted - placeholder)
         logger.info(
             log_event,
             extra={

@@ -12,6 +12,11 @@ export function readConfig(rootEl) {
     bulkUrl: rootEl.dataset.bulkUrl,
     moveUrl: rootEl.dataset.moveUrl,
     initialLocale: rootEl.dataset.locale || "",
+    // ?reveal=<page id>: open the tree at that page (see App's reveal).
+    revealId: Number(rootEl.dataset.reveal) || null,
+    // ?clear_filters=1: start without the search / filters kept from the
+    // last visit ("Show in Page Tree" from a page's edit view).
+    clearFilters: Boolean(rootEl.dataset.clearFilters),
   };
   if (
     !cfg.treeUrl ||

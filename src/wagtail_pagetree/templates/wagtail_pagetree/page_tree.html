@@ -16,6 +16,8 @@
 {% block main_content %}
   <div id="pagetree-root"
        data-locale="{{ request.GET.locale|default:'' }}"
+       data-reveal="{{ request.GET.reveal|default:'' }}"
+       data-clear-filters="{{ request.GET.clear_filters|default:'' }}"
        data-tree-url="{% url 'pagetree:api-tree' %}"
        data-children-url-template="{% url 'pagetree:api-children' page_id=0 %}"
        data-bulk-url="{% url 'pagetree:api-bulk' %}"

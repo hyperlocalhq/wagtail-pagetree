@@ -2,13 +2,16 @@
 
 import json
 from unittest import mock
+from urllib.parse import parse_qs, urlsplit
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.test import TestCase
+from django.utils.html import escape
 from django.urls import reverse
 from wagtail.models import GroupPagePermission, Page
 
+from wagtail_pagetree.services.presenters import pagetree_url
 from wagtail_pagetree.services.permissions import (
     editable_ids,
     permitted_ids,
@@ -111,6 +114,68 @@ class RootHiddenTest(_SuperuserClientMixin, TestCase):
 
     def _add_top_level_url(self):
         return reverse("wagtailadmin_pages:add_subpage", args=[self.root.id])
+
+
+class RevealTest(_SuperuserClientMixin, TestCase):
+    """Admin actions send the user back to the tree, opened at the row."""
+
+    def _row(self, page):
+        pages = self._get("pagetree:api-tree", "locale=de").json()["pages"]
+        return next(row for row in pages if row["id"] == page.id)
+
+    def _next(self, url):
+        return parse_qs(urlsplit(url).query)["next"][0]
+
+    def test_row_actions_reveal_the_row(self):
+        row = self._row(self.magazin_de)
+        expected = pagetree_url(self.magazin_de.id)
+        for key in ("edit_url", "add_child_url", "copy_url"):
+            self.assertEqual(self._next(row[key]), expected, key)
+
+    def test_delete_reveals_the_parent(self):
+        row = self._row(self.magazin_de)
+        self.assertEqual(
+            self._next(row["delete_url"]), pagetree_url(self.home_de.id)
+        )
+
+    def test_translation_actions_reveal_the_primary_row(self):
+        cell = self._row(self.article_a_de)["translations"]["en"]
+        expected = pagetree_url(self.article_a_de.id)
+        for key in ("edit_url", "delete_url", "unpublish_url"):
+            self.assertEqual(self._next(cell[key]), expected, key)
+
+    def test_index_passes_reveal_params_to_the_frontend(self):
+        response = self._get(
+            "pagetree:index", f"reveal={self.magazin_de.id}&clear_filters=1"
+        )
+        self.assertContains(response, f'data-reveal="{self.magazin_de.id}"')
+        self.assertContains(response, 'data-clear-filters="1"')
+
+    def test_page_header_offers_show_in_page_tree(self):
+        response = self.client.get(
+            reverse("wagtailadmin_pages:edit", args=[self.article_a_en.id])
+        )
+        self.assertEqual(response.status_code, 200)
+        url = f"{pagetree_url(self.article_a_en.id)}&locale=en&clear_filters=1"
+        self.assertContains(response, escape(url))
+
+
+class CoverageTest(_SuperuserClientMixin, TestCase):
+    def test_missing_count_matches_the_missing_filter(self):
+        tree = self._get("pagetree:api-tree", "locale=de").json()
+        missing = self._get(
+            "pagetree:api-tree", "locale=de&filter_status=empty&filter_locale=en"
+        ).json()["matches"]
+        self.assertIn(self.article_b_de.id, {row["id"] for row in missing})
+        self.assertEqual(
+            tree["coverage"],
+            {"total": len(tree["pages"]), "missing": {"en": len(missing)}},
+        )
+
+    def test_filtered_responses_carry_page_type_choices(self):
+        tree = self._get("pagetree:api-tree", "locale=de").json()
+        search = self._get("pagetree:api-tree", "locale=de&search=Article").json()
+        self.assertEqual(search["page_types"], tree["page_types"])
 
 
 class TreeAPIErrorTest(_SuperuserClientMixin, TestCase):
