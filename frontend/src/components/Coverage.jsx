@@ -23,6 +23,7 @@ function Coverage({ locales, primaryLocale, coverage, filterLocale, filterStatus
             <span
               key={loc.code}
               className="pt-coverage__item pt-coverage__item--complete"
+              style={{ "--pt-percent": "100%" }}
               title={interpolate(gettext("No pages missing in %s"), [loc.name])}
             >
               {code} 100%
@@ -48,6 +49,8 @@ function Coverage({ locales, primaryLocale, coverage, filterLocale, filterStatus
             type="button"
             className="pt-coverage__item"
             aria-pressed={active}
+            // Fills the pill's background up to the percentage.
+            style={{ "--pt-percent": `${percent}%` }}
             title={title}
             onClick={() => onToggle(loc.code, !active)}
           >

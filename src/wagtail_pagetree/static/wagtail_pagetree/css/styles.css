@@ -560,11 +560,18 @@ button.pt-dot:focus-visible {
   font-weight: 600;
 }
 
+/* Each pill doubles as a progress bar: the background is filled up to
+ * --pt-percent (set inline). */
 .pt-coverage__item {
+  --pt-coverage-fill: rgba(0, 125, 126, 0.16);
   padding: 2px 10px;
   border: 1px solid var(--w-color-border-field-default, #c4c4c4);
   border-radius: 999px;
-  background: var(--w-color-surface-field, #fff);
+  background: linear-gradient(
+    to right,
+    var(--pt-coverage-fill) var(--pt-percent, 0%),
+    var(--w-color-surface-field, #fff) var(--pt-percent, 0%)
+  );
   font: inherit;
   font-variant-numeric: tabular-nums;
   color: var(--pt-text-strong);
@@ -579,13 +586,12 @@ button.pt-coverage__item:hover {
 }
 
 .pt-coverage__item[aria-pressed="true"] {
+  --pt-coverage-fill: rgba(0, 125, 126, 0.32);
   border-color: var(--w-color-surface-button-default, #007d7e);
-  background: var(--w-color-surface-button-default, #007d7e);
-  color: var(--w-color-text-button, #fff);
+  box-shadow: inset 0 0 0 1px var(--w-color-surface-button-default, #007d7e);
 }
 
 .pt-coverage__item--complete {
-  border-style: dashed;
   color: var(--pt-text);
 }
 
