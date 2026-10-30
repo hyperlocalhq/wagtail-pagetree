@@ -289,6 +289,18 @@ function App({ config }) {
     [fetchChildren],
   );
 
+  // Expand all opens every row that has loaded children; the unfiltered
+  // tree loads every visible page up front, so that's the whole tree.
+  const setAllExpanded = useCallback((open) => {
+    const { loadedNodes: nodes, primaryLocale: locale, searchMode: filtered } =
+      stateRef.current;
+    const next = open
+      ? new Set(nodes.filter((n) => n.parent_id != null).map((n) => n.parent_id))
+      : new Set();
+    setExpandedIds(next);
+    if (!filtered) saveExpanded(locale, next);
+  }, []);
+
   const onSearchChange = useCallback((value) => {
     setSearchQuery(value);
     // Text search and the status filter are mutually exclusive.
@@ -511,14 +523,24 @@ function App({ config }) {
         onFilterLocaleChange={onFilterLocaleChange}
         onFilterStatusChange={onFilterStatusChange}
       />
-      <Coverage
-        locales={locales}
-        primaryLocale={primaryLocale}
-        coverage={coverage}
-        filterLocale={filterLocale}
-        filterStatus={filterStatus}
-        onToggle={onToggleMissing}
-      />
+      <div className="pt-treebar">
+        <Coverage
+          locales={locales}
+          primaryLocale={primaryLocale}
+          coverage={coverage}
+          filterLocale={filterLocale}
+          filterStatus={filterStatus}
+          onToggle={onToggleMissing}
+        />
+        <div className="pt-treebar__actions">
+          <TreebarButton icon="collapse-down" onClick={() => setAllExpanded(true)}>
+            {gettext("Expand all")}
+          </TreebarButton>
+          <TreebarButton icon="collapse-up" onClick={() => setAllExpanded(false)}>
+            {gettext("Collapse all")}
+          </TreebarButton>
+        </div>
+      </div>
       {error && (
         <div className="pt-error" role="alert">
           {errorMessageFor(error)}
@@ -594,6 +616,18 @@ function App({ config }) {
       {!searchMode && <Orphans orphans={orphans} primaryLocale={primaryLocale} />}
       <Legend />
     </div>
+  );
+}
+
+// Icons come from the Wagtail admin's SVG sprite, present on every admin page.
+function TreebarButton({ icon, onClick, children }) {
+  return (
+    <button type="button" className="button button-small button-secondary" onClick={onClick}>
+      <svg className="icon" aria-hidden="true">
+        <use href={`#icon-${icon}`} />
+      </svg>
+      {children}
+    </button>
   );
 }
 
