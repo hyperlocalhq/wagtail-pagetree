@@ -5,6 +5,7 @@ import NodeList from "./NodeList.jsx";
 import Orphans from "./Orphans.jsx";
 import Legend from "./Legend.jsx";
 import BulkToolbar from "./BulkToolbar.jsx";
+import Coverage from "./Coverage.jsx";
 import { ApiError, getJson, postJson } from "../api.js";
 import { childrenUrl } from "../urls.js";
 import { ancestorIds, defaultExpansion, groupByParent } from "../tree.js";
@@ -67,7 +68,7 @@ function App({ config }) {
   const [filterPageType, setFilterPageType] = useState(restored.filterPageType || "");
 
   // Per-locale count of tree rows without a page, from the unfiltered tree
-  // payload; kept while filtering. Drives the coverage in the header.
+  // payload; kept while filtering. Drives the coverage strip.
   const [coverage, setCoverage] = useState(null);
 
   // ?reveal=<id>: expand down to that row and highlight it, once. The ref
@@ -311,11 +312,11 @@ function App({ config }) {
     }
   }, []);
 
-  // Coverage in the header: list the pages missing in that locale.
-  const onShowMissing = useCallback((code) => {
+  // Coverage figures toggle the "Missing in <locale>" filter.
+  const onToggleMissing = useCallback((code, on) => {
     setSearchQuery("");
-    setFilterLocale(code);
-    setFilterStatus("empty");
+    setFilterLocale(on ? code : "");
+    setFilterStatus(on ? "empty" : "");
     setSelectedIds(new Set());
   }, []);
 
@@ -510,6 +511,14 @@ function App({ config }) {
         onFilterLocaleChange={onFilterLocaleChange}
         onFilterStatusChange={onFilterStatusChange}
       />
+      <Coverage
+        locales={locales}
+        primaryLocale={primaryLocale}
+        coverage={coverage}
+        filterLocale={filterLocale}
+        filterStatus={filterStatus}
+        onToggle={onToggleMissing}
+      />
       {error && (
         <div className="pt-error" role="alert">
           {errorMessageFor(error)}
@@ -559,13 +568,7 @@ function App({ config }) {
             ].join(" "),
           }}
         >
-          <Header
-            locales={locales}
-            compact={compact}
-            primaryLocale={primaryLocale}
-            coverage={coverage}
-            onShowMissing={onShowMissing}
-          />
+          <Header locales={locales} compact={compact} />
           <NodeList
             parentId={null}
             byParent={byParent}
