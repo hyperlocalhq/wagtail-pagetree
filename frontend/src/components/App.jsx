@@ -291,12 +291,14 @@ function App({ config }) {
 
   // Expand all opens every row that has loaded children; the unfiltered
   // tree loads every visible page up front, so that's the whole tree.
+  // Collapse all goes back to the initial view: the top-level rows (site
+  // homepages) stay open, everything below them closes.
   const setAllExpanded = useCallback((open) => {
     const { loadedNodes: nodes, primaryLocale: locale, searchMode: filtered } =
       stateRef.current;
     const next = open
       ? new Set(nodes.filter((n) => n.parent_id != null).map((n) => n.parent_id))
-      : new Set();
+      : defaultExpansion(nodes);
     setExpandedIds(next);
     if (!filtered) saveExpanded(locale, next);
   }, []);
