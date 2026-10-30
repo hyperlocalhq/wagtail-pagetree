@@ -517,13 +517,41 @@ button.pt-dot:focus-visible {
   font-weight: 700;
 }
 
-/* Translation coverage strip between the toolbar and the tree. */
+/* Bar between the toolbar and the tree: coverage left, expand / collapse
+ * all right. */
+.pt-treebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.pt-treebar__actions {
+  display: flex;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.pt-treebar__actions .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pt-treebar__actions .icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
+/* Translation coverage, inside the tree bar. */
 .pt-coverage {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  margin: 0 0 12px;
   font-size: 0.8rem;
   color: var(--pt-text);
 }

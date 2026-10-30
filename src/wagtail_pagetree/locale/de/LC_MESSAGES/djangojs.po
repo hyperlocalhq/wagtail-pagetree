@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wagtail-pagetree\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 16:33+0200\n"
+"POT-Creation-Date: 2026-10-30 16:40+0200\n"
 "PO-Revision-Date: 2026-10-26 00:00+0000\n"
 "Last-Translator: Hyperlocal HQ\n"
 "Language-Team: German\n"
@@ -14,6 +14,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: frontend/src/components/App.jsx
+msgid "Expand all"
+msgstr "Alle aufklappen"
+
+#: frontend/src/components/App.jsx
+msgid "Collapse all"
+msgstr "Alle zuklappen"
 
 #: frontend/src/components/App.jsx
 msgid "%(count)s %(locale)s page published."
