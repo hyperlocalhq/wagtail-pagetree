@@ -517,6 +517,61 @@ button.pt-dot:focus-visible {
   font-weight: 700;
 }
 
+/* Translation coverage under each locale code in the header. */
+.pt-row--header .pt-row__cell--locale {
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 0;
+}
+
+.pt-coverage {
+  padding: 0 2px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  font: inherit;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--w-color-text-link-default, #007d7e);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.pt-coverage:hover {
+  color: var(--w-color-text-link-hover, #005b5e);
+}
+
+.pt-coverage--complete {
+  color: var(--pt-text);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* Row opened through ?reveal=<id>: a brief tint that fades out. */
+.pt-row--revealed {
+  animation: pt-revealed 2.5s ease-out;
+}
+
+@keyframes pt-revealed {
+  0%,
+  40% {
+    background: var(--w-color-warning-50, #faecd5);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-row--revealed {
+    animation: none;
+    outline: 2px solid var(--w-color-focus, #2e4cef);
+    outline-offset: -2px;
+  }
+}
+
 /* ── Status dots ─────────────────────────────────────────── */
 
 .pt-dot {

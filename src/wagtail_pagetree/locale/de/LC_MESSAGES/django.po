@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wagtail-pagetree\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 06:30-0500\n"
+"POT-Creation-Date: 2026-10-30 09:08-0500\n"
 "PO-Revision-Date: 2026-10-26 00:00+0000\n"
 "Last-Translator: Hyperlocal HQ\n"
 "Language-Team: German\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: templates/wagtail_pagetree/page_tree.html:4 views.py:67 views.py:69
+#: templates/wagtail_pagetree/page_tree.html:4 views.py:68 views.py:70
 #: viewsets.py:18
 msgid "Page Tree"
 msgstr "Seitenbaum"
@@ -24,6 +24,10 @@ msgstr "Seitenbaum"
 msgid "Add top-level page"
 msgstr "Seite auf oberster Ebene hinzufügen"
 
-#: templates/wagtail_pagetree/page_tree.html:23
+#: templates/wagtail_pagetree/page_tree.html:25
 msgid "JavaScript is required to use the Page Tree."
 msgstr "Für den Seitenbaum wird JavaScript benötigt."
+
+#: wagtail_hooks.py:26
+msgid "Show in Page Tree"
+msgstr "Im Seitenbaum anzeigen"

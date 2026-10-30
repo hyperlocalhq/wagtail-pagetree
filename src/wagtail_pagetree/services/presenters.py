@@ -28,53 +28,65 @@ from .tree import (
 )
 
 
-def _edit_url(page_id: int) -> str:
-    return reverse("wagtailadmin_pages:edit", args=[page_id])
+def pagetree_url(reveal: Optional[int] = None) -> str:
+    """The Page Tree, optionally opened at one page (``?reveal=<id>``).
 
-
-def _pagetree_index_url() -> str:
-    """Where to come back to after a delete / copy / add-subpage action.
-
-    Wagtail's create / copy / delete views all honour ``?next=<url>`` via
-    ``get_valid_next_url_from_request`` and redirect there on success
-    instead of bouncing back to the page explorer.
+    The tree expands the page's ancestors and highlights it. ``reveal`` must
+    be a primary-locale row id; other ids are ignored by the frontend.
     """
-    return reverse("pagetree:index")
+    url = reverse("pagetree:index")
+    return f"{url}?{urlencode({'reveal': reveal})}" if reveal else url
 
 
-def _with_next(url: str) -> str:
-    return f"{url}?{urlencode({'next': _pagetree_index_url()})}"
+def _with_next(url: str, reveal: Optional[int] = None) -> str:
+    """Send the user back to the tree, at ``reveal``, once the action is done.
+
+    Wagtail's edit / create / copy / delete / unpublish views all honour
+    ``?next=<url>`` via ``get_valid_next_url_from_request`` and redirect there
+    on success instead of bouncing back to the page explorer.
+    """
+    return f"{url}?{urlencode({'next': pagetree_url(reveal)})}"
+
+
+def _edit_url(page_id: int, reveal: Optional[int] = None) -> str:
+    return _with_next(reverse("wagtailadmin_pages:edit", args=[page_id]), reveal)
 
 
 def _add_child_url(parent_id: int) -> str:
     """Wagtail's add-subpage picker (chooses the page type to add)."""
-    return _with_next(reverse("wagtailadmin_pages:add_subpage", args=[parent_id]))
+    return _with_next(
+        reverse("wagtailadmin_pages:add_subpage", args=[parent_id]), parent_id
+    )
 
 
-def _copy_url(page_id: int) -> str:
-    return _with_next(reverse("wagtailadmin_pages:copy", args=[page_id]))
+def _copy_url(page_id: int, reveal: Optional[int] = None) -> str:
+    return _with_next(reverse("wagtailadmin_pages:copy", args=[page_id]), reveal)
 
 
-def _delete_url(page_id: int) -> str:
-    return _with_next(reverse("wagtailadmin_pages:delete", args=[page_id]))
+def _delete_url(page_id: int, reveal: Optional[int] = None) -> str:
+    return _with_next(reverse("wagtailadmin_pages:delete", args=[page_id]), reveal)
 
 
-def _unpublish_url(page_id: int) -> str:
-    return _with_next(reverse("wagtailadmin_pages:unpublish", args=[page_id]))
+def _unpublish_url(page_id: int, reveal: Optional[int] = None) -> str:
+    return _with_next(
+        reverse("wagtailadmin_pages:unpublish", args=[page_id]), reveal
+    )
 
 
-def _convert_alias_url(page_id: int) -> str:
-    return _with_next(reverse("wagtailadmin_pages:convert_alias", args=[page_id]))
+def _convert_alias_url(page_id: int, reveal: Optional[int] = None) -> str:
+    return _with_next(
+        reverse("wagtailadmin_pages:convert_alias", args=[page_id]), reveal
+    )
 
 
-def _localize_url(viewname: str, arg) -> Optional[str]:
+def _localize_url(viewname: str, arg, reveal: Optional[int] = None) -> Optional[str]:
     """Reverse a wagtail-localize admin URL, or None if it can't be resolved.
 
     Returns None when wagtail-localize isn't installed (its URLs aren't
     registered → ``NoReverseMatch``), so the caller simply omits the link.
     """
     try:
-        return _with_next(reverse(viewname, args=[arg]))
+        return _with_next(reverse(viewname, args=[arg]), reveal)
     except NoReverseMatch:
         return None
 
@@ -187,6 +199,28 @@ def _resolve_page_type_names(content_type_ids) -> dict[int, str]:
     return out
 
 
+def page_type_choices(locale, editable: set[int]) -> list[dict]:
+    """Page-type filter choices without building the tree.
+
+    Same set as ``_page_type_options`` over the unfiltered tree, for filtered
+    responses: a filter restored from an earlier visit needs its choices
+    before the full tree was ever loaded.
+    """
+    from wagtail.models import Page
+
+    type_ids = (
+        Page.objects.filter(locale=locale, id__in=editable, depth__gt=1)
+        .order_by()
+        .values_list("content_type_id", flat=True)
+        .distinct()
+    )
+    names = _resolve_page_type_names(type_ids)
+    return [
+        {"id": type_id, "name": name}
+        for type_id, name in sorted(names.items(), key=lambda item: item[1].lower())
+    ]
+
+
 def _page_type_options(nodes: list[dict]) -> list[dict]:
     """Page-type filter choices: the types of the tree's non-placeholder nodes.
 
@@ -218,6 +252,7 @@ def _translation_cell(
     primary_parent_title: Optional[str] = None,
     site_roots=None,
     outdated: bool = False,
+    row_id: Optional[int] = None,
 ) -> dict:
     """Build one cell of the translation matrix.
 
@@ -239,6 +274,9 @@ def _translation_cell(
     menu entry pointing at the same URL only looked like a distinct action.
     Drift caused by unpublished source edits has no remedy on this cell at all
     (the source must be published/synced), which the dot tooltip says instead.
+
+    ``row_id``: the tree row this cell sits on. Every action returns to the
+    tree revealing that row, which survives even deleting this translation.
     """
     status, aligned = get_page_status(matrix_row, primary_parent_translation_key)
     cell: dict = {"status": status, "aligned": aligned}
@@ -254,13 +292,13 @@ def _translation_cell(
         is_live = bool(matrix_row.get("live"))
         cell["is_alias"] = is_alias
         cell["page_id"] = page_id
-        cell["edit_url"] = _edit_url(page_id)
-        cell["copy_url"] = _copy_url(page_id)
-        cell["delete_url"] = _delete_url(page_id)
+        cell["edit_url"] = _edit_url(page_id, row_id)
+        cell["copy_url"] = _copy_url(page_id, row_id)
+        cell["delete_url"] = _delete_url(page_id, row_id)
         if is_alias:
-            cell["convert_alias_url"] = _convert_alias_url(page_id)
+            cell["convert_alias_url"] = _convert_alias_url(page_id, row_id)
         if is_live:
-            cell["unpublish_url"] = _unpublish_url(page_id)
+            cell["unpublish_url"] = _unpublish_url(page_id, row_id)
             if site_roots is not None:
                 view = _live_url(matrix_row.get("url_path") or "", site_roots)
                 if view:
@@ -303,11 +341,13 @@ def _node_dict(
     if placeholder:
         return node
 
+    # Actions return to the tree revealing this row; a delete reveals the
+    # parent instead, since the row itself is gone.
     node["slug"] = row["slug"]
-    node["edit_url"] = _edit_url(row["id"])
+    node["edit_url"] = _edit_url(row["id"], row["id"])
     node["add_child_url"] = _add_child_url(row["id"])
-    node["copy_url"] = _copy_url(row["id"])
-    node["delete_url"] = _delete_url(row["id"])
+    node["copy_url"] = _copy_url(row["id"], row["id"])
+    node["delete_url"] = _delete_url(row["id"], row.get("parent_id"))
     node["page_type_id"] = row["content_type_id"]
     if page_type_names is not None:
         node["page_type"] = page_type_names.get(row["content_type_id"])
@@ -323,7 +363,7 @@ def _node_dict(
 
     primary_parent_key = row.get("parent_translation_key")
     primary_parent_title = row.get("parent_title")
-    primary_edit_url = _edit_url(row["id"])
+    primary_edit_url = _edit_url(row["id"], row["id"])
     translation_key = row["translation_key"]
     translations: dict[str, dict] = {}
     for loc in locales:
@@ -336,18 +376,19 @@ def _node_dict(
                 primary_parent_translation_key=primary_parent_key,
                 primary_parent_title=primary_parent_title,
                 site_roots=site_roots,
+                row_id=row["id"],
             )
             # wagtail-localize source actions live on the primary cell only.
             source_id = (sync_ids or {}).get(translation_key)
             if source_id is not None:
                 url = _localize_url(
-                    "wagtail_localize:update_translations", source_id
+                    "wagtail_localize:update_translations", source_id, row["id"]
                 )
                 if url:
                     cell["sync_translations_url"] = url
             if translation_key in translatable_keys:
                 url = _localize_url(
-                    "wagtail_localize:submit_page_translation", row["id"]
+                    "wagtail_localize:submit_page_translation", row["id"], row["id"]
                 )
                 if url:
                     cell["translate_page_url"] = url
@@ -359,6 +400,7 @@ def _node_dict(
                 primary_parent_title=primary_parent_title,
                 site_roots=site_roots,
                 outdated=(translation_key, loc.id) in outdated,
+                row_id=row["id"],
             )
         # Empty cells get a "create translation" entry pointing at the
         # source page's edit view; user uses Wagtail's "Translate this page"
@@ -368,6 +410,26 @@ def _node_dict(
         translations[loc_code] = cell
     node["translations"] = translations
     return node
+
+
+def _coverage(primary_rows, matrix_index, primary_locale, all_locales) -> dict:
+    """How many tree rows lack a page in each other locale.
+
+    Counted exactly like the "Missing" status filter (no page at all; an
+    alias counts as present), so clicking a locale's coverage lists the
+    pages that pull it down.
+    """
+    return {
+        "total": len(primary_rows),
+        "missing": {
+            loc.language_code: sum(
+                (row["translation_key"], loc.id) not in matrix_index
+                for row in primary_rows
+            )
+            for loc in all_locales
+            if loc.id != primary_locale.id
+        },
+    }
 
 
 def _index_matrix(matrix: list[dict]) -> dict[tuple[str, int], dict]:
@@ -455,6 +517,7 @@ def build_tree_payload(
         "pages": nodes,
         "orphans": orphan_payload,
         "page_types": _page_type_options(nodes),
+        "coverage": _coverage(primary, matrix_index, primary_locale, all_locales),
     }
 
 

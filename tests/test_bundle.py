@@ -34,9 +34,10 @@ def test_bundle_is_iife_using_window_react():
 
 def test_bundle_under_size_budget():
     # M2 acceptance was < 30 KB minified, externalising React; raised to 32 KB
-    # for the gettext wrappers and whole-sentence plural msgids (~1.2 KB).
+    # for the gettext wrappers and whole-sentence plural msgids (~1.2 KB), then
+    # to 34 KB for remembered view state, ?reveal and translation coverage.
     size = BUNDLE.stat().st_size
-    assert size < 32 * 1024, f"bundle is {size} bytes, budget is 32 KB"
+    assert size < 34 * 1024, f"bundle is {size} bytes, budget is 34 KB"
 
 
 def test_styles_exists():

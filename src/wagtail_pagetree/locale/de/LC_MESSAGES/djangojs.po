@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wagtail-pagetree\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 08:28+0200\n"
+"POT-Creation-Date: 2026-10-30 16:08+0200\n"
 "PO-Revision-Date: 2026-10-26 00:00+0000\n"
 "Last-Translator: Hyperlocal HQ\n"
 "Language-Team: German\n"
@@ -104,6 +104,17 @@ msgstr "Zurücksetzen"
 #: frontend/src/components/ContextMenu.jsx
 msgid "Page actions"
 msgstr "Seitenaktionen"
+
+#: frontend/src/components/Header.jsx
+#, javascript-format
+msgid "No pages missing in %s"
+msgstr "In %s fehlen keine Seiten"
+
+#: frontend/src/components/Header.jsx
+msgid "%(count)s page missing in %(locale)s. Show it."
+msgid_plural "%(count)s pages missing in %(locale)s. Show them."
+msgstr[0] "In %(locale)s fehlt %(count)s Seite. Anzeigen."
+msgstr[1] "In %(locale)s fehlen %(count)s Seiten. Anzeigen."
 
 #: frontend/src/components/Header.jsx
 msgid "Title"
