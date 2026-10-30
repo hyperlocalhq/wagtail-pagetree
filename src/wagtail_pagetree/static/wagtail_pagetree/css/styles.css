@@ -517,36 +517,48 @@ button.pt-dot:focus-visible {
   font-weight: 700;
 }
 
-/* Translation coverage under each locale code in the header. */
-.pt-row--header .pt-row__cell--locale {
-  flex-direction: column;
-  gap: 1px;
-  padding: 2px 0;
+/* Translation coverage strip between the toolbar and the tree. */
+.pt-coverage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  color: var(--pt-text);
 }
 
-.pt-coverage {
-  padding: 0 2px;
-  border: 0;
-  border-radius: 3px;
-  background: none;
-  font: inherit;
-  font-size: 0.6rem;
+.pt-coverage__label {
   font-weight: 600;
-  letter-spacing: 0;
-  color: var(--w-color-text-link-default, #007d7e);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+}
+
+.pt-coverage__item {
+  padding: 2px 10px;
+  border: 1px solid var(--w-color-border-field-default, #c4c4c4);
+  border-radius: 999px;
+  background: var(--w-color-surface-field, #fff);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--pt-text-strong);
+}
+
+button.pt-coverage__item {
   cursor: pointer;
 }
 
-.pt-coverage:hover {
-  color: var(--w-color-text-link-hover, #005b5e);
+button.pt-coverage__item:hover {
+  border-color: var(--w-color-border-field-hover, #929292);
 }
 
-.pt-coverage--complete {
+.pt-coverage__item[aria-pressed="true"] {
+  border-color: var(--w-color-surface-button-default, #007d7e);
+  background: var(--w-color-surface-button-default, #007d7e);
+  color: var(--w-color-text-button, #fff);
+}
+
+.pt-coverage__item--complete {
+  border-style: dashed;
   color: var(--pt-text);
-  text-decoration: none;
-  cursor: default;
 }
 
 /* Row opened through ?reveal=<id>: a brief tint that fades out. */
