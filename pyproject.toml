@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wagtail-pagetree"
-version = "0.2.0"
+version = "0.3.0"
 description = "Lazy-loaded virtualized page tree for the Wagtail admin"
 readme = "README.md"
 requires-python = ">=3.10"
