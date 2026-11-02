@@ -1,0 +1,404 @@
+# Spanish translations for wagtail-pagetree (frontend).
+# This file is distributed under the same license as the wagtail-pagetree package.
+msgid ""
+msgstr ""
+"Project-Id-Version: wagtail-pagetree\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-30 16:40+0200\n"
+"PO-Revision-Date: 2026-10-26 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: frontend/src/components/App.jsx
+msgid "Expand all"
+msgstr "Expandir todo"
+
+#: frontend/src/components/App.jsx
+msgid "Collapse all"
+msgstr "Cerrar todo"
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s %(locale)s page published."
+msgid_plural "%(count)s %(locale)s pages published."
+msgstr[0] "%(count)s página %(locale)s publicada."
+msgstr[1] "%(count)s páginas %(locale)s publicadas."
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s page published."
+msgid_plural "%(count)s pages published."
+msgstr[0] "%(count)s página publicada."
+msgstr[1] "%(count)s páginas publicadas."
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s %(locale)s page unpublished."
+msgid_plural "%(count)s %(locale)s pages unpublished."
+msgstr[0] "%(count)s página %(locale)s despublicada."
+msgstr[1] "%(count)s páginas %(locale)s despublicadas."
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s page unpublished."
+msgid_plural "%(count)s pages unpublished."
+msgstr[0] "%(count)s página despublicada."
+msgstr[1] "%(count)s páginas despublicadas."
+
+#: frontend/src/components/App.jsx
+msgid "%(count)s page moved."
+msgid_plural "%(count)s pages moved."
+msgstr[0] "%(count)s página movida."
+msgstr[1] "%(count)s páginas movidas."
+
+#: frontend/src/components/App.jsx
+msgid "No pages were changed."
+msgstr "No se modificó ninguna página."
+
+#: frontend/src/components/App.jsx
+#, javascript-format
+msgid "%s denied."
+msgstr "%s denegado."
+
+#: frontend/src/components/App.jsx
+#, javascript-format
+msgid "%s translation not moved (no target or diverged tree)."
+msgid_plural "%s translations not moved (no target or diverged tree)."
+msgstr[0] "%s traducción no movida (sin destino o árbol divergente)."
+msgstr[1] "%s traducciones no movidas (sin destino o árbol divergente)."
+
+#: frontend/src/components/App.jsx
+#, javascript-format
+msgid "%s skipped (no translation or already in target state)."
+msgstr "%s omitido (sin traducción o ya en el estado de destino)."
+
+#: frontend/src/components/App.jsx
+#, javascript-format
+msgid "%s errored."
+msgstr "%s con error."
+
+#: frontend/src/components/BulkToolbar.jsx
+msgid "Bulk actions"
+msgstr "Acciones en lote"
+
+#: frontend/src/components/BulkToolbar.jsx
+#, javascript-format
+msgid "%s page selected"
+msgid_plural "%s pages selected"
+msgstr[0] "%s página seleccionada"
+msgstr[1] "%s páginas seleccionadas"
+
+#: frontend/src/components/BulkToolbar.jsx
+msgid "Locale:"
+msgstr "Idioma:"
+
+#: frontend/src/components/BulkToolbar.jsx
+#: frontend/src/components/StatusDot.jsx
+msgid "Publish"
+msgstr "Publicar"
+
+#: frontend/src/components/BulkToolbar.jsx
+#: frontend/src/components/StatusDot.jsx
+msgid "Unpublish"
+msgstr "Despublicar"
+
+#: frontend/src/components/BulkToolbar.jsx
+msgid "Clear"
+msgstr "Limpiar"
+
+#: frontend/src/components/ContextMenu.jsx
+msgid "Page actions"
+msgstr "Acciones de la página"
+
+#: frontend/src/components/Coverage.jsx
+msgid "Translation coverage"
+msgstr "Cobertura de traducción"
+
+#: frontend/src/components/Coverage.jsx
+msgid "Translated:"
+msgstr "Traducido:"
+
+#: frontend/src/components/Coverage.jsx
+#, javascript-format
+msgid "No pages missing in %s"
+msgstr "No faltan páginas en %s"
+
+#: frontend/src/components/Coverage.jsx
+msgid "Show the whole tree again"
+msgstr "Volver a mostrar todo el árbol"
+
+#: frontend/src/components/Coverage.jsx
+msgid "%(count)s page missing in %(locale)s. Show it."
+msgid_plural "%(count)s pages missing in %(locale)s. Show them."
+msgstr[0] "Falta %(count)s página en %(locale)s. Mostrarla."
+msgstr[1] "Faltan %(count)s páginas en %(locale)s. Mostrarlas."
+
+#: frontend/src/components/Coverage.jsx
+#, javascript-format
+msgid "%s missing"
+msgid_plural "%s missing"
+msgstr[0] "falta %s"
+msgstr[1] "faltan %s"
+
+#: frontend/src/components/Header.jsx
+msgid "Title"
+msgstr "Título"
+
+#: frontend/src/components/Header.jsx
+msgid "Type"
+msgstr "Tipo"
+
+#: frontend/src/components/Header.jsx
+msgid "Menu"
+msgstr "Menú"
+
+#: frontend/src/components/Legend.jsx
+msgid "Published — live, no pending edits"
+msgstr "Publicada: en vivo, sin cambios pendientes"
+
+#: frontend/src/components/Legend.jsx
+msgid "Changed — live, but has unpublished edits"
+msgstr "Modificada: en vivo, pero con cambios sin publicar"
+
+#: frontend/src/components/Legend.jsx
+msgid "Draft — never been published"
+msgstr "Borrador: nunca se publicó"
+
+#: frontend/src/components/Legend.jsx
+msgid "Alias — points to another page (no own content)"
+msgstr "Alias: apunta a otra página (sin contenido propio)"
+
+#: frontend/src/components/Legend.jsx
+msgid "Missing — no translation in this locale"
+msgstr "Falta: sin traducción en este idioma"
+
+#: frontend/src/components/Legend.jsx
+msgid "Diverged — parent page differs from primary tree"
+msgstr "Divergente: la página padre difiere del árbol principal"
+
+#: frontend/src/components/Legend.jsx
+msgid "Needs update — source changed since last translation"
+msgstr "Requiere actualización: el original cambió desde la última traducción"
+
+#: frontend/src/components/Legend.jsx
+msgid "Show status legend"
+msgstr "Mostrar leyenda de estados"
+
+#: frontend/src/components/Legend.jsx
+msgid "Status legend"
+msgstr "Leyenda de estados"
+
+#: frontend/src/components/Legend.jsx
+msgid "Hide status legend"
+msgstr "Ocultar leyenda de estados"
+
+#: frontend/src/components/Legend.jsx
+msgid "Hide"
+msgstr "Ocultar"
+
+#: frontend/src/components/Node.jsx
+msgid "Drag to reorder"
+msgstr "Arrastrar para reordenar"
+
+#: frontend/src/components/Node.jsx
+msgid "Shown in menus"
+msgstr "Se muestra en los menús"
+
+#: frontend/src/components/Node.jsx
+msgid "Hidden from menus"
+msgstr "Oculta en los menús"
+
+#: frontend/src/components/Node.jsx
+#, javascript-format
+msgid "Select %s"
+msgstr "Seleccionar %s"
+
+#: frontend/src/components/Node.jsx
+msgid "Add child page"
+msgstr "Añadir página hija"
+
+#: frontend/src/components/Node.jsx frontend/src/components/StatusDot.jsx
+msgid "Edit"
+msgstr "Editar"
+
+#: frontend/src/components/Node.jsx frontend/src/components/StatusDot.jsx
+msgid "View live"
+msgstr "Ver en vivo"
+
+#: frontend/src/components/Node.jsx frontend/src/components/StatusDot.jsx
+msgid "Copy"
+msgstr "Copiar"
+
+#: frontend/src/components/Node.jsx frontend/src/components/StatusDot.jsx
+msgid "Delete"
+msgstr "Eliminar"
+
+#: frontend/src/components/Orphans.jsx frontend/src/components/StatusDot.jsx
+#: frontend/src/components/Toolbar.jsx
+msgid "Published"
+msgstr "Publicada"
+
+#: frontend/src/components/Orphans.jsx frontend/src/components/Toolbar.jsx
+msgid "Changed"
+msgstr "Modificada"
+
+#: frontend/src/components/Orphans.jsx frontend/src/components/StatusDot.jsx
+#: frontend/src/components/Toolbar.jsx
+msgid "Draft"
+msgstr "Borrador"
+
+#: frontend/src/components/Orphans.jsx frontend/src/components/StatusDot.jsx
+#: frontend/src/components/Toolbar.jsx frontend/src/i18n.js
+msgid "Alias"
+msgstr "Alias"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Changed (unpublished edits)"
+msgstr "Modificada (cambios sin publicar)"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "No translation"
+msgstr "Sin traducción"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "source changed since last sync; publish or sync the source page"
+msgstr ""
+"el original cambió desde la última sincronización; publica o sincroniza la "
+"página original"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "%(locale)s under “%(from)s”, expected under “%(expected)s”"
+msgstr "%(locale)s bajo “%(from)s”, se esperaba bajo “%(expected)s”"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "translated parent differs"
+msgstr "la página padre traducida difiere"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Sync translated pages"
+msgstr "Sincronizar páginas traducidas"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Translate this page"
+msgstr "Traducir esta página"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Convert to regular page"
+msgstr "Convertir en página normal"
+
+#: frontend/src/components/StatusDot.jsx
+msgid "Create translation here"
+msgstr "Crear traducción aquí"
+
+#: frontend/src/components/Toolbar.jsx
+msgid "Missing"
+msgstr "Falta"
+
+#: frontend/src/components/Toolbar.jsx
+msgid "Needs update"
+msgstr "Requiere actualización"
+
+#: frontend/src/components/Toolbar.jsx
+msgid "Diverged"
+msgstr "Divergente"
+
+#: frontend/src/i18n.js
+msgid "Page Tree"
+msgstr "Árbol de páginas"
+
+#: frontend/src/i18n.js
+msgid "Loading…"
+msgstr "Cargando…"
+
+#: frontend/src/i18n.js
+msgid "Search pages…"
+msgstr "Buscar páginas…"
+
+#: frontend/src/i18n.js
+msgid "Search query is too long."
+msgstr "La búsqueda es demasiado larga."
+
+#: frontend/src/i18n.js
+msgid "Too many matches; please refine the query."
+msgstr "Demasiados resultados; acota la búsqueda."
+
+#: frontend/src/i18n.js
+msgid "No pages match this query."
+msgstr "Ninguna página coincide con la búsqueda."
+
+#: frontend/src/i18n.js
+msgid "Filter status"
+msgstr "Filtrar por estado"
+
+#: frontend/src/i18n.js
+msgid "No filter"
+msgstr "Sin filtro"
+
+#: frontend/src/i18n.js
+msgid "Filter locale"
+msgstr "Filtrar por idioma"
+
+#: frontend/src/i18n.js
+msgid "in"
+msgstr "en"
+
+#: frontend/src/i18n.js
+msgid "No pages match this filter."
+msgstr "Ninguna página coincide con el filtro."
+
+#: frontend/src/i18n.js
+msgid "Page type"
+msgstr "Tipo de página"
+
+#: frontend/src/i18n.js
+msgid "All page types"
+msgstr "Todos los tipos de página"
+
+#: frontend/src/i18n.js
+msgid "Failed to load pages."
+msgstr "No se pudieron cargar las páginas."
+
+#: frontend/src/i18n.js
+msgid "Retry"
+msgstr "Reintentar"
+
+#: frontend/src/i18n.js
+msgid "Primary locale"
+msgstr "Idioma principal"
+
+#: frontend/src/i18n.js
+msgid "Pages without"
+msgstr "Páginas sin"
+
+#: frontend/src/i18n.js
+msgid "Expand"
+msgstr "Expandir"
+
+#: frontend/src/i18n.js
+msgid "Collapse"
+msgstr "Cerrar"
+
+#: frontend/src/i18n.js
+msgid "(untitled)"
+msgstr "(sin título)"
+
+#: frontend/src/i18n.js
+msgid "You can't edit this page."
+msgstr "No puedes editar esta página."
+
+#: frontend/src/i18n.js
+msgid "Create translation"
+msgstr "Crear traducción"
+
+#: frontend/src/i18n.js
+msgid "Translation lives at a different position"
+msgstr "La traducción está en otra posición"
+
+#: frontend/src/i18n.js
+msgid "alias"
+msgstr "alias"
+
+#: frontend/src/i18n.js
+msgid "Loading children…"
+msgstr "Cargando páginas hijas…"
