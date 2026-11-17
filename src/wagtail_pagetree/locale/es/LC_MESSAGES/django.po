@@ -1,0 +1,32 @@
+# Spanish translations for wagtail-pagetree.
+# This file is distributed under the same license as the wagtail-pagetree package.
+msgid ""
+msgstr ""
+"Project-Id-Version: wagtail-pagetree\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-30 09:08-0500\n"
+"PO-Revision-Date: 2026-10-26 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/wagtail_pagetree/page_tree.html:4 views.py:68 views.py:70
+#: viewsets.py:18
+msgid "Page Tree"
+msgstr "Árbol de páginas"
+
+#: templates/wagtail_pagetree/page_tree.html:12
+msgid "Add top-level page"
+msgstr "Añadir página de nivel superior"
+
+#: templates/wagtail_pagetree/page_tree.html:25
+msgid "JavaScript is required to use the Page Tree."
+msgstr "Se necesita JavaScript para usar el árbol de páginas."
+
+#: wagtail_hooks.py:26
+msgid "Show in Page Tree"
+msgstr "Mostrar en el árbol de páginas"

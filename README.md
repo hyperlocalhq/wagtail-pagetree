@@ -48,7 +48,7 @@ sync / translate views; without it those features are simply absent.
 
 ## Translations
 
-The admin UI ships English and German. Catalogs live in
+The admin UI ships English, German and Spanish. Catalogs live in
 `src/wagtail_pagetree/locale/<lang>/LC_MESSAGES/`:
 
 - `django.po` — Python and template strings
