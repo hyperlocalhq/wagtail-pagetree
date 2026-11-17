@@ -203,6 +203,7 @@ function Node({
 
   const rowClass = [
     "pt-row",
+    node.is_context ? "pt-row--context" : "",
     isDragging ? "pt-row--dragging" : "",
     dropZone ? `pt-row--drop-${dropZone}` : "",
   ]
@@ -247,7 +248,7 @@ function Node({
           href={node.edit_url}
           title={node.page_type ? `${node.title} — ${node.page_type}` : node.title}
         >
-          <Title value={node.title} query={searchQuery} />
+          <Title value={node.title} query={node.is_context ? "" : searchQuery} />
         </a>
       </span>
       {!compact && (

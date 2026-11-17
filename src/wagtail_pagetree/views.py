@@ -327,7 +327,9 @@ class TreeAPIView(View):
             log_event,
             extra={
                 "primary_locale": locale.language_code,
-                "match_count": len(payload["matches"]),
+                "match_count": sum(
+                    1 for row in payload["matches"] if not row.get("is_context")
+                ),
                 **log_extra,
             },
         )
