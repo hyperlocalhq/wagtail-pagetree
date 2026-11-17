@@ -523,15 +523,19 @@ def build_tree_payload(
 
 
 def _parent_titles(rows: list[dict], permitted: set[int], steplen: int = 4) -> dict:
-    """Title of each match's real parent, keyed by the parent's page id.
+    """Breadcrumb of each match's ancestors, keyed by the direct parent's id.
 
     Sets ``parent_ref_id`` on every row whose parent is a permitted page below
     the tree root, so the client can group a flat result list under its
-    parents. Parents the user may not see are left out, never leaked.
+    parents. Ancestors the user may not see are left out, never leaked.
     """
     from wagtail.models import Page
 
-    paths = {row["path"][:-steplen] for row in rows if row["depth"] > 2}
+    def ancestor_paths(path):
+        # Skip depth 1 (the hidden tree root).
+        return [path[:n] for n in range(2 * steplen, len(path), steplen)]
+
+    paths = {a for row in rows for a in ancestor_paths(row["path"])}
     found = {
         page["path"]: page
         for page in Page.objects.filter(path__in=paths, id__in=permitted)
@@ -540,10 +544,10 @@ def _parent_titles(rows: list[dict], permitted: set[int], steplen: int = 4) -> d
     }
     parents: dict[int, str] = {}
     for row in rows:
-        parent = found.get(row["path"][:-steplen])
-        if parent:
-            row["parent_ref_id"] = parent["id"]
-            parents[parent["id"]] = parent["title"]
+        chain = [found[a] for a in ancestor_paths(row["path"]) if a in found]
+        if chain and chain[-1]["path"] == row["path"][:-steplen]:
+            row["parent_ref_id"] = chain[-1]["id"]
+            parents[chain[-1]["id"]] = " \u203a ".join(p["title"] for p in chain)
     return parents
 
 
