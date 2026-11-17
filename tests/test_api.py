@@ -166,6 +166,7 @@ class CoverageTest(_SuperuserClientMixin, TestCase):
         missing = self._get(
             "pagetree:api-tree", "locale=de&filter_status=empty&filter_locale=en"
         ).json()["matches"]
+        missing = [row for row in missing if not row.get("is_context")]
         self.assertIn(self.article_b_de.id, {row["id"] for row in missing})
         self.assertEqual(
             tree["coverage"],
@@ -178,19 +179,27 @@ class CoverageTest(_SuperuserClientMixin, TestCase):
         self.assertEqual(search["page_types"], tree["page_types"])
 
 
-class SearchParentTest(_SuperuserClientMixin, TestCase):
-    def test_matches_name_their_real_parent_once(self):
+class SearchContextTest(_SuperuserClientMixin, TestCase):
+    def test_matches_come_with_their_ancestors_marked_as_context(self):
         data = self._get("pagetree:api-tree", "locale=de&search=Article").json()
-        by_id = {row["id"]: row for row in data["matches"]}
-        row = by_id[self.article_b_de.id]
-        parent = self.article_b_de.get_parent()
-        if parent.depth > 1:
-            self.assertEqual(row["parent_ref_id"], parent.id)
-            crumbs = data["parents"][str(parent.id)].split(" \u203a ")
-            self.assertEqual(crumbs[-1], parent.title)
-        for match in data["matches"]:
-            ref = match.get("parent_ref_id")
-            self.assertTrue(ref is None or str(ref) in data["parents"])
+        rows = {row["id"]: row for row in data["matches"]}
+        match = rows[self.article_b_de.id]
+        self.assertNotIn("is_context", match)
+        ancestors = [
+            p for p in self.article_b_de.get_ancestors() if p.depth > 1
+        ]
+        self.assertTrue(ancestors)
+        for page in ancestors:
+            self.assertTrue(rows[page.id].get("is_context"), page.title)
+        self.assertEqual(len(rows), len(data["matches"]), "duplicate rows")
+        # Context rows keep the tree shape: each match resolves its parent.
+        self.assertEqual(match["parent_id"], self.article_b_de.get_parent().id)
+
+    def test_non_matching_siblings_are_left_out(self):
+        data = self._get("pagetree:api-tree", "locale=de&search=Article").json()
+        for row in data["matches"]:
+            if not row.get("is_context"):
+                self.assertIn("article", row["title"].lower())
 
 
 class TreeAPIErrorTest(_SuperuserClientMixin, TestCase):

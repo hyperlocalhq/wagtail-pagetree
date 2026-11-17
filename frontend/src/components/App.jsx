@@ -53,8 +53,6 @@ function App({ config }) {
   const [error, setError] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchMode, setSearchMode] = useState(false);
-  // id → title of each match's real parent (search / filter results only).
-  const [parentTitles, setParentTitles] = useState({});
 
   // Locale×status tree filter. `filterStatus` is one of the base
   // statuses or a flag (outdated/diverged), or "" when off. `filterLocale` is
@@ -180,7 +178,6 @@ function App({ config }) {
           // resolve to parent_id=null server-side, so matches render as a
           // flat list — exactly what "show me the stale pages" wants.
           nodes = payload.matches || [];
-          setParentTitles(payload.parents || {});
           setOrphans([]);
           // Auto-expand any ancestors that *are* within the match set.
           expand = new Set();
@@ -603,7 +600,6 @@ function App({ config }) {
             expanded={expandedIds}
             loading={loadingIds}
             searchQuery={searchMode ? debouncedQuery : ""}
-            parentTitles={searchMode ? parentTitles : null}
             onToggle={onToggle}
             compact={compact}
             selectedIds={selectedIds}

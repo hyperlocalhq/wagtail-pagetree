@@ -338,13 +338,15 @@ def _node_dict(
         "visible_numchild": visible_counts.get(row["id"], 0),
         "is_placeholder": placeholder,
     }
+    if row.get("is_context"):
+        # Shown only to keep a match in place; not a result itself.
+        node["is_context"] = True
     if placeholder:
         return node
 
     # Actions return to the tree revealing this row; a delete reveals the
     # parent instead, since the row itself is gone.
     node["slug"] = row["slug"]
-    node["parent_ref_id"] = row.get("parent_ref_id")
     node["edit_url"] = _edit_url(row["id"], row["id"])
     node["add_child_url"] = _add_child_url(row["id"])
     node["copy_url"] = _copy_url(row["id"], row["id"])
@@ -522,33 +524,29 @@ def build_tree_payload(
     }
 
 
-def _parent_titles(rows: list[dict], permitted: set[int], steplen: int = 4) -> dict:
-    """Breadcrumb of each match's ancestors, keyed by the direct parent's id.
+def _context_rows(
+    ancestor_paths: list[str], locale, visible: set[int], exclude_ids: set[int]
+) -> list[dict]:
+    """Ancestor pages of the matches, so results keep their place in the tree.
 
-    Sets ``parent_ref_id`` on every row whose parent is a permitted page below
-    the tree root, so the client can group a flat result list under its
-    parents. Ancestors the user may not see are left out, never leaked.
+    Only pages the user may see (or that render as placeholders) are returned;
+    the hidden tree root is never included.
     """
     from wagtail.models import Page
 
-    def ancestor_paths(path):
-        # Skip depth 1 (the hidden tree root).
-        return [path[:n] for n in range(2 * steplen, len(path), steplen)]
+    from .tree import PRIMARY_FIELDS
 
-    paths = {a for row in rows for a in ancestor_paths(row["path"])}
-    found = {
-        page["path"]: page
-        for page in Page.objects.filter(path__in=paths, id__in=permitted)
+    rows = list(
+        Page.objects.filter(
+            locale=locale, path__in=ancestor_paths, depth__gt=1, id__in=visible
+        )
+        .exclude(id__in=exclude_ids)
         .order_by()
-        .values("id", "title", "path")
-    }
-    parents: dict[int, str] = {}
+        .values(*PRIMARY_FIELDS)
+    )
     for row in rows:
-        chain = [found[a] for a in ancestor_paths(row["path"]) if a in found]
-        if chain and chain[-1]["path"] == row["path"][:-steplen]:
-            row["parent_ref_id"] = chain[-1]["id"]
-            parents[chain[-1]["id"]] = " \u203a ".join(p["title"] for p in chain)
-    return parents
+        row["is_context"] = True
+    return rows
 
 
 def build_search_payload(
@@ -562,8 +560,17 @@ def build_search_payload(
     can_submit_translation: bool = False,
 ) -> dict:
     """Search response — matches + ancestor IDs the client should expand."""
-    matches_list = list(matches)
     ancestor_paths_list = list(ancestor_paths)
+    # Matches plus their ancestors, in tree order: the client renders the
+    # familiar tree with every non-matching branch left out.
+    matches = list(matches)
+    context = _context_rows(
+        ancestor_paths_list,
+        primary_locale,
+        permitted | placeholder,
+        exclude_ids={row["id"] for row in matches},
+    )
+    matches_list = sorted([*matches, *context], key=lambda row: row["path"])
     # annotate_* set parent_id (for flat rendering) but only resolve
     # parent_translation_key within this sparse match set — overwrite it with a
     # DB-backed lookup so alignment (the diverged signal) is correct here too.
@@ -589,8 +596,6 @@ def build_search_payload(
     )
     site_roots = _site_root_paths_cache()
 
-    parents = _parent_titles(matches_list, permitted)
-
     return {
         "locales": _locale_summary(all_locales),
         "primary_locale": primary_locale.language_code,
@@ -609,6 +614,5 @@ def build_search_payload(
             )
             for row in matches_list
         ],
-        "parents": parents,
         "ancestor_paths": ancestor_paths_list,
     }
