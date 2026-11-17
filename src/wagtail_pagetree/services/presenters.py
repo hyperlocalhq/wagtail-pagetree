@@ -344,6 +344,7 @@ def _node_dict(
     # Actions return to the tree revealing this row; a delete reveals the
     # parent instead, since the row itself is gone.
     node["slug"] = row["slug"]
+    node["parent_ref_id"] = row.get("parent_ref_id")
     node["edit_url"] = _edit_url(row["id"], row["id"])
     node["add_child_url"] = _add_child_url(row["id"])
     node["copy_url"] = _copy_url(row["id"], row["id"])
@@ -521,6 +522,31 @@ def build_tree_payload(
     }
 
 
+def _parent_titles(rows: list[dict], permitted: set[int], steplen: int = 4) -> dict:
+    """Title of each match's real parent, keyed by the parent's page id.
+
+    Sets ``parent_ref_id`` on every row whose parent is a permitted page below
+    the tree root, so the client can group a flat result list under its
+    parents. Parents the user may not see are left out, never leaked.
+    """
+    from wagtail.models import Page
+
+    paths = {row["path"][:-steplen] for row in rows if row["depth"] > 2}
+    found = {
+        page["path"]: page
+        for page in Page.objects.filter(path__in=paths, id__in=permitted)
+        .order_by()
+        .values("id", "title", "path")
+    }
+    parents: dict[int, str] = {}
+    for row in rows:
+        parent = found.get(row["path"][:-steplen])
+        if parent:
+            row["parent_ref_id"] = parent["id"]
+            parents[parent["id"]] = parent["title"]
+    return parents
+
+
 def build_search_payload(
     *,
     primary_locale,
@@ -559,6 +585,8 @@ def build_search_payload(
     )
     site_roots = _site_root_paths_cache()
 
+    parents = _parent_titles(matches_list, permitted)
+
     return {
         "locales": _locale_summary(all_locales),
         "primary_locale": primary_locale.language_code,
@@ -577,5 +605,6 @@ def build_search_payload(
             )
             for row in matches_list
         ],
+        "parents": parents,
         "ancestor_paths": ancestor_paths_list,
     }
