@@ -11,6 +11,7 @@ function NodeList({
   expanded,
   loading,
   searchQuery,
+  parentTitles = null,
   onToggle,
   compact = false,
   selectedIds,
@@ -33,7 +34,14 @@ function NodeList({
       id={parentId == null ? "pt-children-root" : `pt-children-${parentId}`}
       role={parentId == null ? "tree" : "group"}
     >
-      {children.map((node) => {
+      {children.map((node, i) => {
+        // Search results are a flat list: show each real parent once, as a
+        // heading above its (path-sorted, so adjacent) matches.
+        const refId = parentTitles ? node.parent_ref_id : null;
+        const showParent =
+          refId != null &&
+          parentTitles[refId] !== undefined &&
+          (i === 0 || children[i - 1].parent_ref_id !== refId);
         const isExpanded = expanded.has(node.id);
         const isLoading = loading.has(node.id);
         const hasKids =
@@ -46,6 +54,11 @@ function NodeList({
 
         return (
           <React.Fragment key={node.id}>
+            {showParent && (
+              <div className="pt-parent-heading" role="presentation">
+                {parentTitles[refId]}
+              </div>
+            )}
             <Node
               node={node}
               locales={locales}

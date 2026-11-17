@@ -178,6 +178,20 @@ class CoverageTest(_SuperuserClientMixin, TestCase):
         self.assertEqual(search["page_types"], tree["page_types"])
 
 
+class SearchParentTest(_SuperuserClientMixin, TestCase):
+    def test_matches_name_their_real_parent_once(self):
+        data = self._get("pagetree:api-tree", "locale=de&search=Article").json()
+        by_id = {row["id"]: row for row in data["matches"]}
+        row = by_id[self.article_b_de.id]
+        parent = self.article_b_de.get_parent()
+        if parent.depth > 1:
+            self.assertEqual(row["parent_ref_id"], parent.id)
+            self.assertEqual(data["parents"][str(parent.id)], parent.title)
+        for match in data["matches"]:
+            ref = match.get("parent_ref_id")
+            self.assertTrue(ref is None or str(ref) in data["parents"])
+
+
 class TreeAPIErrorTest(_SuperuserClientMixin, TestCase):
     def test_search_too_long(self):
         response = self._get("pagetree:api-tree", "search=" + "x" * 201)
