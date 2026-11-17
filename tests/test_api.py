@@ -186,7 +186,8 @@ class SearchParentTest(_SuperuserClientMixin, TestCase):
         parent = self.article_b_de.get_parent()
         if parent.depth > 1:
             self.assertEqual(row["parent_ref_id"], parent.id)
-            self.assertEqual(data["parents"][str(parent.id)], parent.title)
+            crumbs = data["parents"][str(parent.id)].split(" \u203a ")
+            self.assertEqual(crumbs[-1], parent.title)
         for match in data["matches"]:
             ref = match.get("parent_ref_id")
             self.assertTrue(ref is None or str(ref) in data["parents"])
